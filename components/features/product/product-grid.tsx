@@ -1,9 +1,9 @@
-import { Product } from "@/types";
+import { ProductWithImages } from "@/types";
 import { ProductCard } from "@/components/features/product/product-card";
 import { cn } from "@/lib/utils";
 
 interface ProductGridProps {
-    products: Product[];
+    products: ProductWithImages[];
     columns?: 2 | 3 | 4;
     className?: string;
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
-import { Product } from "@/types";
+import { ProductWithImages } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductImage } from "@/components/ui/product-image";
@@ -12,7 +12,7 @@ import { CertificationBadge, CertificationType } from "@/components/ui/certifica
 import { Separator } from "@/components/ui/separator";
 
 interface ProductHeroProps {
-    product: Product;
+    product: ProductWithImages;
 }
 
 export function ProductHero({ product }: ProductHeroProps) {
@@ -23,29 +23,31 @@ export function ProductHero({ product }: ProductHeroProps) {
         setQuantity((prev) => Math.max(1, prev + delta));
     };
 
+    const mainImage = product.images?.[selectedImage]?.image_url;
+
     return (
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
             {/* Product Images */}
             <div className="space-y-4">
                 <ProductImage
-                    src={product.images[selectedImage]}
+                    src={mainImage}
                     alt={product.name}
                     aspectRatio="square"
                     className="rounded-2xl border"
                 />
-                {product.images.length > 1 && (
+                {product.images && product.images.length > 1 && (
                     <div className="flex gap-4 overflow-x-auto pb-2">
                         {product.images.map((image, index) => (
                             <button
-                                key={index}
+                                key={image.id}
                                 onClick={() => setSelectedImage(index)}
                                 className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 ${selectedImage === index
-                                        ? "border-primary-600"
-                                        : "border-transparent hover:border-neutral-300"
+                                    ? "border-primary-600"
+                                    : "border-transparent hover:border-neutral-300"
                                     }`}
                             >
                                 <ProductImage
-                                    src={image}
+                                    src={image.image_url}
                                     alt={`${product.name} thumbnail ${index + 1}`}
                                     aspectRatio="square"
                                     className="object-cover"
@@ -59,16 +61,16 @@ export function ProductHero({ product }: ProductHeroProps) {
             {/* Product Details */}
             <div className="flex flex-col">
                 <div className="mb-4">
-                    <Badge variant="outline" className="mb-2 border-primary-200 bg-primary-50 text-primary-700">
+                    {/* <Badge variant="outline" className="mb-2 border-primary-200 bg-primary-50 text-primary-700">
                         {product.category}
-                    </Badge>
+                    </Badge> */}
                     <h1 className="font-heading text-3xl font-bold text-neutral-900 sm:text-4xl">
                         {product.name}
                     </h1>
                     <div className="mt-2 flex items-center gap-4">
-                        <RatingDisplay rating={product.rating} reviewCount={product.reviewCount} showCount />
-                        {product.inStock ? (
-                            <span className="text-sm font-medium text-green-600">In Stock</span>
+                        {/* <RatingDisplay rating={product.rating} reviewCount={product.reviewCount} showCount /> */}
+                        {product.stock_quantity > 0 ? (
+                            <span className="text-sm font-medium text-green-600">In Stock ({product.stock_quantity})</span>
                         ) : (
                             <span className="text-sm font-medium text-red-600">Out of Stock</span>
                         )}
@@ -77,13 +79,10 @@ export function ProductHero({ product }: ProductHeroProps) {
 
                 <div className="mb-6 flex items-baseline gap-4">
                     <PriceDisplay
-                        amount={product.salePrice || product.price}
+                        amount={product.base_price}
                         variant="large"
                         className="text-3xl"
                     />
-                    {product.salePrice && (
-                        <PriceDisplay amount={product.price} variant="original" className="text-xl" />
-                    )}
                 </div>
 
                 <p className="mb-8 text-neutral-600 leading-relaxed">
@@ -117,7 +116,7 @@ export function ProductHero({ product }: ProductHeroProps) {
                         </Button>
                     </div>
 
-                    <Button size="lg" className="flex-1 gap-2 text-base" disabled={!product.inStock}>
+                    <Button size="lg" className="flex-1 gap-2 text-base" disabled={product.stock_quantity === 0}>
                         <ShoppingCart className="h-5 w-5" />
                         Add to Cart
                     </Button>

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Product } from "@/types";
+import { ProductWithImages } from "@/types";
 import { Container } from "@/components/ui/container";
 import { ProductGrid } from "@/components/features/product/product-grid";
 import { Button } from "@/components/ui/button";
 
 interface FeaturedProductsProps {
-    products: Product[];
+    products: ProductWithImages[];
     title?: string;
     description?: string;
     linkText?: string;
