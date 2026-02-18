@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
 import { ProductWithImages } from "@/types";
@@ -6,17 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { ProductImage } from "@/components/ui/product-image";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { RatingDisplay } from "@/components/ui/rating-display";
+import { WishlistButton } from "@/components/features/wishlist/wishlist-button";
 
 interface ProductCardProps {
     product: ProductWithImages;
     variant?: "default" | "compact" | "featured";
+    isWishlisted?: boolean;
 }
 
-export function ProductCard({ product, variant = "default" }: ProductCardProps) {
+export function ProductCard({ product, variant = "default", isWishlisted = false }: ProductCardProps) {
     const mainImage = product.images?.[0]?.image_url;
     const inStock = product.stock_quantity > 0;
-    // const rating = product.rating || 0; // Not in schema yet
-    // const reviewCount = product.reviewCount || 0; // Not in schema yet
 
     return (
         <div className="group relative flex flex-col overflow-hidden rounded-lg bg-white border shadow-sm transition-all hover:shadow-lg">
@@ -38,16 +40,14 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
                     </Badge>
                 )}
                 {/* Wishlist Button */}
-                <button className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 text-neutral-600 opacity-0 transition-opacity hover:bg-white hover:text-red-500 group-hover:opacity-100">
-                    <Heart className="h-5 w-5" />
-                    <span className="sr-only">Add to wishlist</span>
-                </button>
+                <WishlistButton
+                    productId={product.id}
+                    isWishlisted={isWishlisted}
+                    variant="card-overlay"
+                />
             </Link>
 
             <div className="flex flex-1 flex-col p-4">
-                {/* <div className="mb-2">
-                    <RatingDisplay rating={rating} reviewCount={reviewCount} showCount size="sm" />
-                </div> */}
                 <Link href={`/products/${product.slug}`} className="mb-2">
                     <h3 className="line-clamp-2 text-sm font-medium text-neutral-900 group-hover:text-primary-600">
                         {product.name}

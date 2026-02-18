@@ -11,10 +11,14 @@ import {
     Settings,
     LogOut,
     Menu,
+    FolderTree,
+    MessageSquare,
+    FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { logout } from "@/app/actions/auth"
 
 interface AppShellProps {
     children: React.ReactNode
@@ -23,10 +27,14 @@ interface AppShellProps {
 const sidebarLinks = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: ShoppingBag },
+    { href: "/admin/categories", label: "Categories", icon: FolderTree },
     { href: "/admin/orders", label: "Orders", icon: ListOrdered },
     { href: "/admin/customers", label: "Customers", icon: Users },
+    { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+    { href: "/admin/blog", label: "Blog", icon: FileText },
     { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
+
 
 export function AppShell({ children }: AppShellProps) {
     const pathname = usePathname()
@@ -64,10 +72,12 @@ export function AppShell({ children }: AppShellProps) {
                         </nav>
                     </div>
                     <div className="mt-auto p-4">
-                        <Button variant="outline" className="w-full justify-start gap-2">
-                            <LogOut className="h-4 w-4" />
-                            Sign Out
-                        </Button>
+                        <form action={logout}>
+                            <Button type="submit" variant="outline" className="w-full justify-start gap-2">
+                                <LogOut className="h-4 w-4" />
+                                Sign Out
+                            </Button>
+                        </form>
                     </div>
                 </div>
             </div>

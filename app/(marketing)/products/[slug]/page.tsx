@@ -2,12 +2,30 @@ import { notFound } from "next/navigation"
 import { createServerClient } from "@/lib/supabase/server"
 import { Container } from "@/components/ui/container"
 import { ProductHero } from "@/components/features/product/product-hero"
-import { Product, ProductWithRelations } from "@/types"
+import { ProductWithRelations } from "@/types"
+import { getProductReviews } from "@/app/actions/reviews"
+import { ReviewList } from "@/components/features/reviews/review-list"
+import { ReviewForm } from "@/components/features/reviews/review-form"
 
 export const dynamic = 'force-dynamic'
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: ProductPageProps) {
+    const { slug } = await params
+    const supabase = await createServerClient()
+    const { data } = await supabase
+        .from('products')
+        .select('name, short_description')
+        .eq('slug', slug)
+        .single()
+
+    return {
+        title: data ? `${data.name} | fewofmany` : 'Product | fewofmany',
+        description: data?.short_description || 'Premium hygiene products crafted with care.',
+    }
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -33,8 +51,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         notFound()
     }
 
-    // Casting to unknown first to avoid deep type mismatch during dev
     const product = productData as unknown as ProductWithRelations
+
+    // Fetch reviews and auth state in parallel
+    const [reviewData, authData] = await Promise.all([
+        getProductReviews(product.id),
+        supabase.auth.getUser(),
+    ])
+
+    const isLoggedIn = !!authData.data.user
 
     return (
         <Container>
@@ -60,6 +85,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             </p>
                         </div>
                     )}
+                </div>
+
+                {/* Reviews Section */}
+                <div className="mt-16">
+                    <h2 className="text-2xl font-heading font-bold text-neutral-900 mb-6">
+                        Customer Reviews
+                    </h2>
+                    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+                        <ReviewList
+                            reviews={reviewData.reviews}
+                            averageRating={reviewData.averageRating ?? 0}
+                            totalReviews={reviewData.totalReviews ?? 0}
+                        />
+                        <ReviewForm productId={product.id} isLoggedIn={isLoggedIn} />
+                    </div>
                 </div>
             </div>
         </Container>

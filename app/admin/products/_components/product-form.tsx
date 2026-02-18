@@ -73,26 +73,34 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
     async function onSubmit(data: ProductFormValues) {
         const formData = new FormData()
         Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && value !== "") {
+            // Always include booleans and numbers (even 0 / false)
+            if (typeof value === "boolean" || typeof value === "number") {
+                formData.append(key, value.toString())
+            } else if (value !== undefined && value !== null && value !== "") {
                 formData.append(key, value.toString())
             }
-            // Special handling for booleans or numbers if needed? 
-            // coercing numbers handles string input, but formData is all strings.
-            // createProduct / updateProduct server actions utilize coerce or expect strings that look like numbers?
-            // Server actions define schema too. Let's assume they handle form data standard coercion.
-            // However, base_price=0 might be skipped if I check value !== ""? No, 0 !== "".
         })
 
         try {
             if (initialData) {
-                await updateProduct(initialData.id, formData)
-                toast.success("Product updated successfully")
+                const result = await updateProduct(initialData.id, formData)
+                if (result?.error) {
+                    toast.error(result.error)
+                    return
+                }
             } else {
-                await createProduct(formData)
-                toast.success("Product created successfully")
+                const result = await createProduct(formData)
+                if (result?.error) {
+                    toast.error(result.error)
+                    return
+                }
             }
-            router.push("/admin/products")
-        } catch (error) {
+            // redirect() in server actions throws NEXT_REDIRECT, which is fine
+        } catch (error: any) {
+            // Re-throw Next.js redirect errors — they are NOT real errors
+            if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+                throw error
+            }
             toast.error("Something went wrong")
             console.error(error)
         }

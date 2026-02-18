@@ -1,38 +1,92 @@
+import Link from "next/link"
 import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, CheckCircle, XCircle, AlertCircle } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+    DollarSign,
+    ShoppingCart,
+    Users,
+    Package,
+    AlertTriangle,
+    MessageSquare,
+    ArrowRight,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = 'force-dynamic'
 
 async function getDashboardStats() {
     const supabase = await createServerClient()
 
-    // Total Products
-    const { count: totalProducts, error: totalError } = await supabase
+    // Revenue
+    const { data: revenueData } = await supabase
+        .from('orders')
+        .select('total')
+        .in('status', ['processing', 'shipped', 'delivered'])
+
+    const totalRevenue = revenueData?.reduce((sum, o) => sum + parseFloat(o.total), 0) || 0
+
+    // Order counts
+    const { count: totalOrders } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+
+    const { count: pendingOrders } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+
+    // Customers
+    const { count: totalCustomers } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+
+    // Products
+    const { count: totalProducts } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true })
 
-    // Active Products
-    const { count: activeProducts, error: activeError } = await supabase
+    // Low stock (≤5)
+    const { data: lowStockProducts } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true })
+        .select('id, name, stock_quantity, sku')
+        .lte('stock_quantity', 5)
         .eq('is_active', true)
+        .order('stock_quantity', { ascending: true })
+        .limit(5)
 
-    // Out of Stock
-    const { count: outOfStock, error: stockError } = await supabase
-        .from('products')
+    // Pending reviews
+    const { count: pendingReviews } = await supabase
+        .from('reviews')
         .select('*', { count: 'exact', head: true })
-        .eq('stock_quantity', 0)
+        .eq('is_approved', false)
 
-    if (totalError || activeError || stockError) {
-        console.error("Error fetching stats:", { totalError, activeError, stockError })
-    }
+    // Recent orders
+    const { data: recentOrders } = await supabase
+        .from('orders')
+        .select('id, order_number, total, status, created_at, user:users(first_name, last_name, email)')
+        .order('created_at', { ascending: false })
+        .limit(5)
 
     return {
-        total: totalProducts || 0,
-        active: activeProducts || 0,
-        outOfStock: outOfStock || 0,
+        totalRevenue,
+        totalOrders: totalOrders || 0,
+        pendingOrders: pendingOrders || 0,
+        totalCustomers: totalCustomers || 0,
+        totalProducts: totalProducts || 0,
+        pendingReviews: pendingReviews || 0,
+        lowStockProducts: lowStockProducts || [],
+        recentOrders: recentOrders || [],
     }
+}
+
+const STATUS_COLORS: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800",
+    processing: "bg-blue-100 text-blue-800",
+    shipped: "bg-purple-100 text-purple-800",
+    delivered: "bg-green-100 text-green-800",
+    cancelled: "bg-red-100 text-red-800",
+    refunded: "bg-neutral-100 text-neutral-800",
 }
 
 export default async function DashboardPage() {
@@ -40,47 +94,137 @@ export default async function DashboardPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex items-center">
-                <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+
+            {/* Stat Cards — Row 1 */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                        <DollarSign className="h-4 w-4 text-green-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
+                        <p className="text-xs text-muted-foreground">From completed orders</p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Orders</CardTitle>
+                        <ShoppingCart className="h-4 w-4 text-blue-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalOrders}</div>
+                        <p className="text-xs text-muted-foreground">{stats.pendingOrders} pending</p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Customers</CardTitle>
+                        <Users className="h-4 w-4 text-purple-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalCustomers}</div>
+                        <p className="text-xs text-muted-foreground">Registered users</p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Products</CardTitle>
+                        <Package className="h-4 w-4 text-orange-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                        <p className="text-xs text-muted-foreground">{stats.pendingReviews} reviews pending</p>
+                    </CardContent>
+                </Card>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            {/* Row 2: Recent Orders + Low Stock */}
+            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+                {/* Recent Orders */}
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-                        <Package className="h-4 w-4 text-muted-foreground" />
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-base">Recent Orders</CardTitle>
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link href="/admin/orders" className="text-xs">
+                                View All <ArrowRight className="h-3 w-3 ml-1" />
+                            </Link>
+                        </Button>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.total}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Total products in database
-                        </p>
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Order</TableHead>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead>Total</TableHead>
+                                    <TableHead>Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {stats.recentOrders.map((order: any) => {
+                                    const name = order.user
+                                        ? `${order.user.first_name || ""} ${order.user.last_name || ""}`.trim() || order.user.email
+                                        : "—"
+                                    return (
+                                        <TableRow key={order.id}>
+                                            <TableCell>
+                                                <Link href={`/admin/orders/${order.id}`} className="font-mono text-xs hover:underline">
+                                                    {order.order_number}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell className="text-sm">{name}</TableCell>
+                                            <TableCell className="font-medium">₹{parseFloat(order.total).toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[order.status] || ""}`}>
+                                                    {order.status}
+                                                </span>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                                {stats.recentOrders.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                                            No orders yet
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
 
+                {/* Low Stock */}
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-500" />
+                            Low Stock Alerts
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.active}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Products visible in store
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
-                        <AlertCircle className="h-4 w-4 text-red-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.outOfStock}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Products with 0 stock
-                        </p>
+                        {stats.lowStockProducts.length > 0 ? (
+                            <div className="space-y-3">
+                                {stats.lowStockProducts.map((p: any) => (
+                                    <div key={p.id} className="flex justify-between items-center text-sm">
+                                        <div>
+                                            <p className="font-medium truncate max-w-[180px]">{p.name}</p>
+                                            <p className="text-xs text-muted-foreground">{p.sku}</p>
+                                        </div>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${p.stock_quantity === 0 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                                            {p.stock_quantity === 0 ? "Out of stock" : `${p.stock_quantity} left`}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground text-center py-4">All stock levels healthy ✓</p>
+                        )}
                     </CardContent>
                 </Card>
             </div>

@@ -6,9 +6,10 @@ interface ProductGridProps {
     products: ProductWithImages[];
     columns?: 2 | 3 | 4;
     className?: string;
+    wishlistIds?: string[];
 }
 
-export function ProductGrid({ products, columns = 3, className }: ProductGridProps) {
+export function ProductGrid({ products, columns = 3, className, wishlistIds = [] }: ProductGridProps) {
     const gridCols = {
         2: "sm:grid-cols-2",
         3: "sm:grid-cols-2 lg:grid-cols-3",
@@ -18,7 +19,11 @@ export function ProductGrid({ products, columns = 3, className }: ProductGridPro
     return (
         <div className={cn("grid grid-cols-1 gap-6", gridCols[columns], className)}>
             {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                    key={product.id}
+                    product={product}
+                    isWishlisted={wishlistIds.includes(product.id)}
+                />
             ))}
         </div>
     );

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface FeaturedProductsProps {
     products: ProductWithImages[];
+    wishlistIds?: string[];
     title?: string;
     description?: string;
     linkText?: string;
@@ -15,6 +16,7 @@ interface FeaturedProductsProps {
 
 export function FeaturedProducts({
     products,
+    wishlistIds = [],
     title = "Featured Products",
     description = "Our most popular picks for you.",
     linkText = "View All",
@@ -42,7 +44,7 @@ export function FeaturedProducts({
                     )}
                 </div>
 
-                <ProductGrid products={products} columns={4} />
+                <ProductGrid products={products} columns={4} wishlistIds={wishlistIds} />
             </Container>
         </section>
     );

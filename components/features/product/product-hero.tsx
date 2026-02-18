@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
+import { ShoppingCart, Heart, Minus, Plus, Check } from "lucide-react";
 import { ProductWithImages } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import { PriceDisplay } from "@/components/ui/price-display";
 import { RatingDisplay } from "@/components/ui/rating-display";
 import { CertificationBadge, CertificationType } from "@/components/ui/certification-badge";
 import { Separator } from "@/components/ui/separator";
+import { useCartStore } from "@/stores/cart-store";
+import { useUIStore } from "@/stores/ui-store";
+import { toast } from "sonner";
 
 interface ProductHeroProps {
     product: ProductWithImages;
@@ -18,9 +21,37 @@ interface ProductHeroProps {
 export function ProductHero({ product }: ProductHeroProps) {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [isAdding, setIsAdding] = useState(false);
+
+    const addItem = useCartStore((s) => s.addItem);
+    const openCart = useUIStore((s) => s.openCart);
 
     const handleQuantityChange = (delta: number) => {
-        setQuantity((prev) => Math.max(1, prev + delta));
+        setQuantity((prev) => Math.max(1, Math.min(prev + delta, product.stock_quantity)));
+    };
+
+    const handleAddToCart = () => {
+        setIsAdding(true);
+
+        const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+
+        addItem({
+            productId: product.id,
+            variantId: null,
+            name: product.name,
+            price: product.base_price,
+            image: primaryImage?.image_url || null,
+            sku: product.sku,
+            maxStock: product.stock_quantity,
+        }, quantity);
+
+        toast.success(`${product.name} added to cart`, {
+            description: `Quantity: ${quantity}`,
+        });
+
+        openCart();
+
+        setTimeout(() => setIsAdding(false), 600);
     };
 
     const mainImage = product.images?.[selectedImage]?.image_url;
@@ -61,14 +92,10 @@ export function ProductHero({ product }: ProductHeroProps) {
             {/* Product Details */}
             <div className="flex flex-col">
                 <div className="mb-4">
-                    {/* <Badge variant="outline" className="mb-2 border-primary-200 bg-primary-50 text-primary-700">
-                        {product.category}
-                    </Badge> */}
                     <h1 className="font-heading text-3xl font-bold text-neutral-900 sm:text-4xl">
                         {product.name}
                     </h1>
                     <div className="mt-2 flex items-center gap-4">
-                        {/* <RatingDisplay rating={product.rating} reviewCount={product.reviewCount} showCount /> */}
                         {product.stock_quantity > 0 ? (
                             <span className="text-sm font-medium text-green-600">In Stock ({product.stock_quantity})</span>
                         ) : (
@@ -111,14 +138,29 @@ export function ProductHero({ product }: ProductHeroProps) {
                             size="icon"
                             className="h-10 w-10 rounded-none"
                             onClick={() => handleQuantityChange(1)}
+                            disabled={quantity >= product.stock_quantity}
                         >
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
 
-                    <Button size="lg" className="flex-1 gap-2 text-base" disabled={product.stock_quantity === 0}>
-                        <ShoppingCart className="h-5 w-5" />
-                        Add to Cart
+                    <Button
+                        size="lg"
+                        className="flex-1 gap-2 text-base bg-primary-600 hover:bg-primary-700 text-white"
+                        disabled={product.stock_quantity === 0 || isAdding}
+                        onClick={handleAddToCart}
+                    >
+                        {isAdding ? (
+                            <>
+                                <Check className="h-5 w-5" />
+                                Added!
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingCart className="h-5 w-5" />
+                                Add to Cart
+                            </>
+                        )}
                     </Button>
 
                     <Button variant="outline" size="lg" className="px-4">
