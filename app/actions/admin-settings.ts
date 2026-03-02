@@ -2,6 +2,7 @@
 
 import { createServerClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getAdminClient } from './utils'
 
 // Default settings used as fallback
 const DEFAULT_SETTINGS: Record<string, string> = {
@@ -43,29 +44,33 @@ export async function getSettings() {
 }
 
 export async function updateSettings(formData: FormData) {
-    const supabase = await createServerClient()
+    try {
+        const { supabase } = await getAdminClient()
+        const entries: { key: string; value: string }[] = []
 
-    const entries: { key: string; value: string }[] = []
 
-    formData.forEach((value, key) => {
-        entries.push({ key, value: value.toString() })
-    })
+        formData.forEach((value, key) => {
+            entries.push({ key, value: value.toString() })
+        })
 
-    // Upsert each setting
-    for (const entry of entries) {
-        const { error } = await supabase
-            .from('site_settings')
-            .upsert(
-                { key: entry.key, value: entry.value, updated_at: new Date().toISOString() },
-                { onConflict: 'key' }
-            )
+        // Upsert each setting
+        for (const entry of entries) {
+            const { error } = await supabase
+                .from('site_settings')
+                .upsert(
+                    { key: entry.key, value: entry.value, updated_at: new Date().toISOString() },
+                    { onConflict: 'key' }
+                )
 
-        if (error) {
-            console.error(`Error updating setting ${entry.key}:`, error)
-            return { error: `Failed to update ${entry.key}: ${error.message}` }
+            if (error) {
+                console.error(`Error updating setting ${entry.key}:`, error)
+                return { error: `Failed to update ${entry.key}: ${error.message}` }
+            }
         }
-    }
 
-    revalidatePath('/admin/settings')
-    return { error: null }
+        revalidatePath('/admin/settings')
+        return { error: null }
+    } catch (error: any) {
+        return { error: error.message }
+    }
 }

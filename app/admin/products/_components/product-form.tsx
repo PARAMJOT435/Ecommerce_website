@@ -28,6 +28,7 @@ import { ProductWithRelations, Category } from "@/types"
 import { createProduct, updateProduct } from "@/app/actions/admin"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 const productSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -40,7 +41,7 @@ const productSchema = z.object({
     is_active: z.boolean().default(true),
     is_featured: z.boolean().default(false),
     category_id: z.string().optional(),
-    imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    image: z.union([z.instanceof(File), z.string()]).optional().nullable(),
 })
 
 type ProductFormValues = z.infer<typeof productSchema>
@@ -66,13 +67,16 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
             is_active: initialData?.is_active ?? true,
             is_featured: initialData?.is_featured ?? false,
             category_id: initialData?.category_id || "",
-            imageUrl: initialData?.images?.[0]?.image_url || "",
+            image: initialData?.images?.[0]?.image_url || null,
         },
     })
 
     async function onSubmit(data: ProductFormValues) {
         const formData = new FormData()
         Object.entries(data).forEach(([key, value]) => {
+            // Skip image field, we handle it separately
+            if (key === "image") return
+
             // Always include booleans and numbers (even 0 / false)
             if (typeof value === "boolean" || typeof value === "number") {
                 formData.append(key, value.toString())
@@ -80,6 +84,13 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                 formData.append(key, value.toString())
             }
         })
+
+        // Handle image
+        if (data.image instanceof File) {
+            formData.append("imageFile", data.image)
+        } else if (typeof data.image === "string") {
+            formData.append("imageUrl", data.image)
+        }
 
         try {
             if (initialData) {
@@ -209,15 +220,18 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
 
                 <FormField
                     control={form.control}
-                    name="imageUrl"
+                    name="image"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Image URL (Temporary)</FormLabel>
+                            <FormLabel>Product Image</FormLabel>
                             <FormControl>
-                                <Input placeholder="https://example.com/image.jpg" {...field} />
+                                <ImageUpload
+                                    value={field.value || null}
+                                    onChange={field.onChange}
+                                />
                             </FormControl>
                             <FormDescription>
-                                Enter a direct URL to an image. Future updates will support file upload.
+                                Upload a product image. Max 5MB.
                             </FormDescription>
                             <FormMessage />
                         </FormItem>

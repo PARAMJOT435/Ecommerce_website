@@ -25,9 +25,16 @@ export default async function AccountLayout({
         lastName: user.user_metadata?.last_name as string | null,
     }
 
+    const { data: admin } = await supabase
+        .from('admins')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+    const isAdmin = !!admin
+
     return (
         <div className="flex min-h-screen flex-col bg-neutral-50">
-            <Header user={headerUser} />
+            <Header user={headerUser} isAdmin={isAdmin} />
             <AccountMobileTabs />
             <Container className="flex-1 py-8">
                 <div className="grid gap-8 md:grid-cols-[240px_1fr]">

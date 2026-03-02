@@ -33,7 +33,30 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Protected routes
+    if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/account')) {
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            url.searchParams.set('next', request.nextUrl.pathname)
+            return NextResponse.redirect(url)
+        }
+    }
+
+    // Admin role check
+    if (user && request.nextUrl.pathname.startsWith('/admin')) {
+        const { data: admin } = await supabase
+            .from('admins')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (!admin) {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+    }
 
     return response
 }

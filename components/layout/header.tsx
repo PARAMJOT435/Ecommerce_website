@@ -27,9 +27,10 @@ interface HeaderProps {
         firstName?: string | null
         lastName?: string | null
     } | null
+    isAdmin?: boolean
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, isAdmin }: HeaderProps) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const totalItems = useCartStore((s) => s.totalItems);
     const openCart = useUIStore((s) => s.openCart);
@@ -52,6 +53,11 @@ export function Header({ user }: HeaderProps) {
                             <Link href="/" className="font-heading text-lg font-semibold">
                                 fewofmany
                             </Link>
+                            {isAdmin && (
+                                <Link href="/admin/dashboard" className="text-primary-600 font-medium hover:text-primary-700">
+                                    Admin Dashboard
+                                </Link>
+                            )}
                             <Link href="/products" className="text-muted-foreground hover:text-foreground">
                                 Products
                             </Link>
@@ -83,6 +89,11 @@ export function Header({ user }: HeaderProps) {
                         </span>
                     </Link>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+                        {isAdmin && (
+                            <Link href="/admin/dashboard" className="text-primary-600 font-bold hover:text-primary-700">
+                                Dashboard
+                            </Link>
+                        )}
                         <Link href="/products" className="transition-colors hover:text-foreground/80">
                             Products
                         </Link>
@@ -169,13 +180,26 @@ export function Header({ user }: HeaderProps) {
                                                 {user.email}
                                             </p>
                                         )}
+                                        {isAdmin && (
+                                            <p className="text-xs font-bold text-primary-600 mt-1">
+                                                Administrator
+                                            </p>
+                                        )}
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                {isAdmin && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/admin/dashboard" className="flex items-center font-semibold">
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            Admin Panel
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem asChild>
                                     <Link href="/account" className="flex items-center">
-                                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                                        Dashboard
+                                        <User className="mr-2 h-4 w-4" />
+                                        My Account
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
