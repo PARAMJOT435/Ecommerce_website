@@ -93,137 +93,139 @@ export default async function DashboardPage() {
     const stats = await getDashboardStats()
 
     return (
-        <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <div className="flex flex-col gap-4 sm:gap-6">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Dashboard</h1>
 
-            {/* Stat Cards — Row 1 */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card>
+            {/* Stat Cards — Row 1 - Mobile Optimized */}
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                        <DollarSign className="h-4 w-4 text-green-600" />
+                        <CardTitle className="text-xs sm:text-sm font-medium truncate">Total Revenue</CardTitle>
+                        <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 shrink-0" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
-                        <p className="text-xs text-muted-foreground">From completed orders</p>
+                        <div className="text-lg sm:text-2xl font-bold">₹{stats.totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
+                        <p className="text-xs text-muted-foreground mt-1">From completed orders</p>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Orders</CardTitle>
-                        <ShoppingCart className="h-4 w-4 text-blue-600" />
+                        <CardTitle className="text-xs sm:text-sm font-medium truncate">Orders</CardTitle>
+                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                        <p className="text-xs text-muted-foreground">{stats.pendingOrders} pending</p>
+                        <div className="text-lg sm:text-2xl font-bold">{stats.totalOrders}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{stats.pendingOrders} pending</p>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Customers</CardTitle>
-                        <Users className="h-4 w-4 text-purple-600" />
+                        <CardTitle className="text-xs sm:text-sm font-medium truncate">Customers</CardTitle>
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 shrink-0" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-                        <p className="text-xs text-muted-foreground">Registered users</p>
+                        <div className="text-lg sm:text-2xl font-bold">{stats.totalCustomers}</div>
+                        <p className="text-xs text-muted-foreground mt-1">Registered users</p>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Products</CardTitle>
-                        <Package className="h-4 w-4 text-orange-600" />
+                        <CardTitle className="text-xs sm:text-sm font-medium truncate">Products</CardTitle>
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 shrink-0" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalProducts}</div>
-                        <p className="text-xs text-muted-foreground">{stats.pendingReviews} reviews pending</p>
+                        <div className="text-lg sm:text-2xl font-bold">{stats.totalProducts}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{stats.pendingReviews} reviews pending</p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Row 2: Recent Orders + Low Stock */}
-            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+            {/* Row 2: Recent Orders + Low Stock - Mobile Optimized */}
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-1 lg:grid-cols-[2fr_1fr]">
                 {/* Recent Orders */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-base">Recent Orders</CardTitle>
-                        <Button variant="ghost" size="sm" asChild>
-                            <Link href="/admin/orders" className="text-xs">
+                <Card className="min-w-0">
+                    <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 sm:pb-4">
+                        <CardTitle className="text-sm sm:text-base">Recent Orders</CardTitle>
+                        <Button variant="ghost" size="sm" asChild className="w-full sm:w-auto text-xs">
+                            <Link href="/admin/orders" className="justify-start sm:justify-end">
                                 View All <ArrowRight className="h-3 w-3 ml-1" />
                             </Link>
                         </Button>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {stats.recentOrders.map((order: any) => {
-                                    const name = order.user
-                                        ? `${order.user.first_name || ""} ${order.user.last_name || ""}`.trim() || order.user.email
-                                        : "—"
-                                    return (
-                                        <TableRow key={order.id}>
-                                            <TableCell>
-                                                <Link href={`/admin/orders/${order.id}`} className="font-mono text-xs hover:underline">
-                                                    {order.order_number}
-                                                </Link>
-                                            </TableCell>
-                                            <TableCell className="text-sm">{name}</TableCell>
-                                            <TableCell className="font-medium">₹{parseFloat(order.total).toFixed(2)}</TableCell>
-                                            <TableCell>
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[order.status] || ""}`}>
-                                                    {order.status}
-                                                </span>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="text-xs">Order</TableHead>
+                                        <TableHead className="text-xs hidden sm:table-cell">Customer</TableHead>
+                                        <TableHead className="text-xs">Total</TableHead>
+                                        <TableHead className="text-xs">Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {stats.recentOrders.map((order: any) => {
+                                        const name = order.user
+                                            ? `${order.user.first_name || ""} ${order.user.last_name || ""}`.trim() || order.user.email
+                                            : "—"
+                                        return (
+                                            <TableRow key={order.id}>
+                                                <TableCell>
+                                                    <Link href={`/admin/orders/${order.id}`} className="font-mono text-xs hover:underline">
+                                                        {order.order_number}
+                                                    </Link>
+                                                </TableCell>
+                                                <TableCell className="text-xs hidden sm:table-cell truncate max-w-[150px]">{name}</TableCell>
+                                                <TableCell className="font-medium text-xs sm:text-sm">₹{parseFloat(order.total).toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    <span className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[order.status] || ""}`}>
+                                                        {order.status}
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                                    {stats.recentOrders.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center py-6 sm:py-8 text-xs sm:text-sm text-muted-foreground">
+                                                No orders yet
                                             </TableCell>
                                         </TableRow>
-                                    )
-                                })}
-                                {stats.recentOrders.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
-                                            No orders yet
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
 
                 {/* Low Stock */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2">
-                            <AlertTriangle className="h-4 w-4 text-amber-500" />
-                            Low Stock Alerts
+                <Card className="min-w-0">
+                    <CardHeader className="pb-3 sm:pb-4">
+                        <CardTitle className="text-sm sm:text-base flex items-center gap-2 truncate">
+                            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-amber-500 shrink-0" />
+                            <span>Low Stock Alerts</span>
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-2 sm:space-y-3">
                         {stats.lowStockProducts.length > 0 ? (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 {stats.lowStockProducts.map((p: any) => (
-                                    <div key={p.id} className="flex justify-between items-center text-sm">
-                                        <div>
-                                            <p className="font-medium truncate max-w-[180px]">{p.name}</p>
-                                            <p className="text-xs text-muted-foreground">{p.sku}</p>
+                                    <div key={p.id} className="flex justify-between items-start sm:items-center gap-2 text-xs sm:text-sm">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium truncate">{p.name}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{p.sku}</p>
                                         </div>
-                                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${p.stock_quantity === 0 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                                            {p.stock_quantity === 0 ? "Out of stock" : `${p.stock_quantity} left`}
+                                        <span className={`text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${p.stock_quantity === 0 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                                            {p.stock_quantity === 0 ? "Out" : `${p.stock_quantity}`}
                                         </span>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-muted-foreground text-center py-4">All stock levels healthy ✓</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground text-center py-4">All stock levels healthy ✓</p>
                         )}
                     </CardContent>
                 </Card>
