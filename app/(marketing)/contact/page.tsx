@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 
 export const metadata = {
-    title: "Contact Us | fewofmany",
-    description: "Get in touch with fewofmany. We're here to help with orders, product questions, and feedback.",
+    title: "Contact Us | MMW",
+    description: "Get in touch with MMW. We're here to help with orders, product questions, and feedback.",
 }
 
 export default function ContactPage() {
@@ -66,8 +66,8 @@ export default function ContactPage() {
                                 <Mail className="h-5 w-5 text-primary-600 mt-0.5" />
                                 <div>
                                     <p className="font-medium text-sm">Email</p>
-                                    <a href="mailto:hello@fewofmany.com" className="text-sm text-muted-foreground hover:text-primary-600">
-                                        hello@fewofmany.com
+                                    <a href="mailto:hello@MMW.com" className="text-sm text-muted-foreground hover:text-primary-600">
+                                        hello@MMW.com
                                     </a>
                                 </div>
                             </div>
@@ -85,8 +85,8 @@ export default function ContactPage() {
                                 <div>
                                     <p className="font-medium text-sm">Address</p>
                                     <p className="text-sm text-muted-foreground">
-                                        fewofmany HQ<br />
-                                        Chandigarh, India
+                                        MMW HQ<br />
+                                        Ludhiana, Punjab, India
                                     </p>
                                 </div>
                             </div>

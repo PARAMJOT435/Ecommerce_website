@@ -6,19 +6,19 @@ import { getAdminClient } from './utils'
 
 // Default settings used as fallback
 const DEFAULT_SETTINGS: Record<string, string> = {
-    store_name: 'fewofmany',
-    store_tagline: 'Hygiene essentials for everyone',
-    store_email: 'hello@fewofmany.com',
-    store_phone: '+91 12345 67890',
-    store_address: 'Chandigarh, India',
-    currency: 'INR',
-    free_shipping_threshold: '499',
-    flat_shipping_rate: '49',
-    returns_window_days: '7',
+    store_name: 'MMW Industrial',
+    store_tagline: 'Heavy Machinery & Professional Equipment',
+    store_email: 'sales@mmwindustrial.com',
+    store_phone: '+91 1800 555 0000',
+    store_address: 'Industrial Area, Phase 1, Ludhiana, Punjab, India',
+    currency: 'USD',
+    free_shipping_threshold: '10000',
+    flat_shipping_rate: '250',
+    returns_window_days: '30',
     gst_rate: '18',
     tax_included: 'false',
-    payment_gateway: 'Razorpay',
-    business_hours: 'Mon — Sat: 10 AM – 6 PM IST',
+    payment_gateway: 'B2B Invoice / Wire Transfer',
+    business_hours: 'Mon — Fri: 8 AM – 6 PM IST',
 }
 
 export async function getSettings() {

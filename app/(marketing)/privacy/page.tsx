@@ -1,8 +1,8 @@
 import { Container } from "@/components/ui/container"
 
 export const metadata = {
-    title: "Privacy Policy | fewofmany",
-    description: "Learn how fewofmany collects, uses, and protects your personal information.",
+    title: "Privacy Policy | MMW",
+    description: "Learn how MMW collects, uses, and protects your personal information.",
 }
 
 export default function PrivacyPolicyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
                 <p className="text-muted-foreground text-sm mb-8">Last updated: February 2026</p>
 
                 <p>
-                    At <strong>fewofmany</strong>, we are committed to protecting your privacy. This Privacy Policy explains how we collect,
+                    At <strong>MMW</strong>, we are committed to protecting your privacy. This Privacy Policy explains how we collect,
                     use, disclose, and safeguard your information when you visit our website and purchase our products.
                 </p>
 
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
                 </ul>
                 <p>
                     To exercise any of these rights, email us at{" "}
-                    <a href="mailto:hello@fewofmany.com" className="text-primary-600">hello@fewofmany.com</a>.
+                    <a href="mailto:hello@MMW.com" className="text-primary-600">hello@MMW.com</a>.
                 </p>
 
                 <h2>7. Third-Party Links</h2>
@@ -104,9 +104,9 @@ export default function PrivacyPolicyPage() {
                     If you have any questions about this Privacy Policy, please contact us:
                 </p>
                 <ul>
-                    <li><strong>Email:</strong> <a href="mailto:hello@fewofmany.com" className="text-primary-600">hello@fewofmany.com</a></li>
+                    <li><strong>Email:</strong> <a href="mailto:hello@MMW.com" className="text-primary-600">hello@MMW.com</a></li>
                     <li><strong>Phone:</strong> +91 12345 67890</li>
-                    <li><strong>Address:</strong> fewofmany HQ, Chandigarh, India</li>
+                    <li><strong>Address:</strong> MMW HQ, Ludhiana, Punjab, India</li>
                 </ul>
             </div>
         </Container>
