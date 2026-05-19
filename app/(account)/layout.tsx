@@ -19,17 +19,23 @@ export default async function AccountLayout({
         redirect('/login')
     }
 
+    // Check if user is admin - admins cannot access customer account pages
+    const { data: admin } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+    if (admin) {
+        redirect('/admin/dashboard')
+    }
+
     const headerUser = {
         email: user.email ?? '',
         firstName: user.user_metadata?.first_name as string | null,
         lastName: user.user_metadata?.last_name as string | null,
     }
 
-    const { data: admin } = await supabase
-        .from('admins')
-        .select('role')
-        .eq('id', user.id)
-        .single()
     const isAdmin = !!admin
 
     return (

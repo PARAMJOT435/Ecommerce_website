@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShoppingCart, Heart, Minus, Plus, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ShoppingCart, Heart, Minus, Plus, Check, AlertCircle } from "lucide-react";
 import { ProductWithImages } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
 import { toast } from "sonner";
+import { QuoteModal } from "@/components/features/product/quote-modal";
 
 interface ProductHeroProps {
     product: ProductWithImages;
@@ -22,9 +23,28 @@ export function ProductHero({ product }: ProductHeroProps) {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isAdding, setIsAdding] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const addItem = useCartStore((s) => s.addItem);
     const openCart = useUIStore((s) => s.openCart);
+
+    useEffect(() => {
+        // Check if user is admin
+        const checkAdmin = async () => {
+            try {
+                const response = await fetch('/api/auth/check-admin')
+                const data = await response.json()
+                setIsAdmin(data.isAdmin)
+            } catch (error) {
+                setIsAdmin(false)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        checkAdmin()
+    }, [])
 
     const handleQuantityChange = (delta: number) => {
         setQuantity((prev) => Math.max(1, Math.min(prev + delta, product.stock_quantity)));
@@ -55,6 +75,8 @@ export function ProductHero({ product }: ProductHeroProps) {
     };
 
     const mainImage = product.images?.[selectedImage]?.image_url;
+
+    if (isLoading) return null;
 
     return (
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
@@ -118,67 +140,75 @@ export function ProductHero({ product }: ProductHeroProps) {
 
                 <Separator className="mb-8" />
 
-                <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-                    {/* Quantity Selector */}
-                    <div className="flex items-center rounded-md border border-neutral-300">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10 rounded-none"
-                            onClick={() => handleQuantityChange(-1)}
-                            disabled={quantity <= 1}
-                        >
-                            <Minus className="h-4 w-4" />
-                        </Button>
-                        <div className="flex h-10 w-12 items-center justify-center border-l border-r border-neutral-300 bg-neutral-50 font-medium">
-                            {quantity}
+                {/* Admin Warning */}
+                {isAdmin && (
+                    <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4 flex gap-3">
+                        <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-orange-900">
+                            <p className="font-medium">Admin Access Detected</p>
+                            <p className="text-xs mt-1">Checkout and cart features are for customers only. Please use a customer account to test the checkout flow.</p>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-10 w-10 rounded-none"
-                            onClick={() => handleQuantityChange(1)}
-                            disabled={quantity >= product.stock_quantity}
-                        >
-                            <Plus className="h-4 w-4" />
-                        </Button>
                     </div>
+                )}
 
-                    <Button
-                        size="lg"
-                        className="flex-1 gap-2 text-base bg-primary-600 hover:bg-primary-700 text-white"
-                        disabled={product.stock_quantity === 0 || isAdding}
-                        onClick={handleAddToCart}
-                    >
-                        {isAdding ? (
-                            <>
-                                <Check className="h-5 w-5" />
-                                Added!
-                            </>
-                        ) : (
-                            <>
-                                <ShoppingCart className="h-5 w-5" />
-                                Add to Cart
-                            </>
-                        )}
-                    </Button>
+                <div className="mb-8 flex flex-col gap-4 sm:flex-row">
+                    {/* Conditional: Add to Cart or Request Quote */}
+                    {product.is_quote_only ? (
+                        <QuoteModal product={product} />
+                    ) : (
+                        <>
+                            {/* Quantity Selector */}
+                            <div className="flex items-center rounded-md border border-neutral-300">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-none"
+                                    onClick={() => handleQuantityChange(-1)}
+                                    disabled={quantity <= 1 || isAdmin}
+                                >
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                <div className="flex h-10 w-12 items-center justify-center border-l border-r border-neutral-300 bg-neutral-50 font-medium">
+                                    {quantity}
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-none"
+                                    onClick={() => handleQuantityChange(1)}
+                                    disabled={quantity >= product.stock_quantity || isAdmin}
+                                >
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+
+                            <Button
+                                size="lg"
+                                className="flex-1 gap-2 text-base bg-primary-600 hover:bg-primary-700 text-white"
+                                disabled={product.stock_quantity === 0 || isAdding || isAdmin}
+                                onClick={handleAddToCart}
+                                title={isAdmin ? "Admin accounts cannot add items to cart" : "Add to cart"}
+                            >
+                                {isAdding ? (
+                                    <>
+                                        <Check className="h-5 w-5" />
+                                        Added!
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart className="h-5 w-5" />
+                                        Add to Cart
+                                    </>
+                                )}
+                            </Button>
+                        </>
+                    )}
 
                     <Button variant="outline" size="lg" className="px-4">
                         <Heart className="h-5 w-5" />
                     </Button>
                 </div>
 
-                {/* Certifications */}
-                {product.certifications && product.certifications.length > 0 && (
-                    <div className="mt-auto">
-                        <h4 className="mb-3 text-sm font-semibold text-neutral-900">Certifications</h4>
-                        <div className="flex flex-wrap gap-4">
-                            {product.certifications.map((cert) => (
-                                <CertificationBadge key={cert} type={cert as CertificationType} />
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

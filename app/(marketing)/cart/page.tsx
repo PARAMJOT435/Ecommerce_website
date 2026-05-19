@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, ShoppingBag, Trash2 } from "lucide-react"
 import { Container } from "@/components/ui/container"
@@ -9,11 +9,49 @@ import { Separator } from "@/components/ui/separator"
 import { useCartStore } from "@/stores/cart-store"
 import { CartItemCard } from "@/components/features/cart/cart-item-card"
 import { CartSummary } from "@/components/features/cart/cart-summary"
+import { AdminAccessRestriction } from "@/components/features/admin/admin-access-restriction"
+import {
+    Sheet,
+    SheetContent,
+} from "@/components/ui/sheet"
 
 export default function CartPage() {
     const items = useCartStore((s) => s.items)
     const clearCart = useCartStore((s) => s.clearCart)
     const totalItems = useCartStore((s) => s.totalItems)
+    const [showClearConfirm, setShowClearConfirm] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        // Check if user is admin
+        const checkAdmin = async () => {
+            try {
+                const response = await fetch('/api/auth/check-admin')
+                const data = await response.json()
+                setIsAdmin(data.isAdmin)
+            } catch (error) {
+                setIsAdmin(false)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        checkAdmin()
+    }, [])
+
+    if (isLoading) return null
+
+    if (isAdmin) {
+        return (
+            <Container>
+                <AdminAccessRestriction
+                    title="Shopping Cart"
+                    message="The shopping cart is designed for customers only. Admin accounts cannot place orders."
+                />
+            </Container>
+        )
+    }
 
     if (items.length === 0) {
         return (
@@ -61,7 +99,7 @@ export default function CartPage() {
                         variant="ghost"
                         size="sm"
                         className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2"
-                        onClick={clearCart}
+                        onClick={() => setShowClearConfirm(true)}
                     >
                         <Trash2 className="h-4 w-4" />
                         Clear Cart
@@ -102,6 +140,31 @@ export default function CartPage() {
                     </div>
                 </div>
             </div>
+
+            {showClearConfirm && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg space-y-4">
+                        <h2 className="text-lg font-semibold">Clear Cart?</h2>
+                        <p className="text-sm text-muted-foreground">
+                            This will remove all {totalItems()} {totalItems() === 1 ? 'item' : 'items'} from your cart. This action cannot be undone.
+                        </p>
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>Keep Items</Button>
+                            <Button
+                                onClick={handleClearCartConfirm}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Clear Cart
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Container>
     )
+}
+
+const handleClearCartConfirm = () => {
+    setShowClearConfirm(false)
+    clearCart()
 }
