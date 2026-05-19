@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     const { post } = await getBlogPostBySlug(slug)
 
     return {
-        title: post ? `${post.title} | fewofmany Blog` : 'Blog Post | fewofmany',
-        description: post?.excerpt || 'Read more on the fewofmany blog.',
+        title: post ? `${post.title} | MMW Blog` : 'Blog Post | MMW',
+        description: post?.excerpt || 'Read more on the MMW blog.',
     }
 }
 

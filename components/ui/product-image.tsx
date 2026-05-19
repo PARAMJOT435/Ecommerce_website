@@ -38,7 +38,7 @@ export function ProductImage({
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className={cn(
-                    "h-full w-full object-cover transition-transform duration-300 hover:scale-105",
+                    "h-full w-full object-contain transition-transform duration-300 hover:scale-105",
                     className
                 )}
                 {...props}

@@ -7,7 +7,7 @@ import { getAddresses } from "@/app/actions/account"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Checkout | fewofmany",
+    title: "Checkout | MMW",
     description: "Complete your purchase securely.",
 }
 
@@ -17,6 +17,17 @@ export default async function CheckoutPage() {
 
     if (!user) {
         redirect('/login')
+    }
+
+    // Check if user is admin - admins cannot checkout
+    const { data: adminData } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+    if (adminData) {
+        redirect('/admin/dashboard')
     }
 
     // Fetch saved addresses

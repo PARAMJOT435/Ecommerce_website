@@ -26,7 +26,7 @@ export default async function EditBlogPostPage({ params }: EditBlogPostPageProps
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold tracking-tight">Edit Blog Post</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Edit Blog Post</h1>
             <BlogPostForm
                 action={handleUpdate}
                 defaultValues={{

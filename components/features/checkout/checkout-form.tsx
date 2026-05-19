@@ -60,6 +60,8 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
     const [selectedAddressId, setSelectedAddressId] = useState<string | "new">(
         savedAddresses.length > 0 ? savedAddresses[0].id : "new"
     )
+    const [showAddressForm, setShowAddressForm] = useState(savedAddresses.length === 0)
+    const [saveAddressForFuture, setSaveAddressForFuture] = useState(false)
 
     // Address state — pre-fill from first saved address if available
     const firstSaved = savedAddresses[0]
@@ -76,6 +78,7 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
     const handleSelectAddress = (id: string) => {
         setSelectedAddressId(id)
         if (id === "new") {
+            setShowAddressForm(true)
             setAddress({ fullName: "", addressLine1: "", addressLine2: "", city: "", state: "", postalCode: "", phone: "" })
         } else {
             const saved = savedAddresses.find((a) => a.id === id)
@@ -89,6 +92,7 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
                     postalCode: saved.postal_code,
                     phone: saved.phone,
                 })
+                setShowAddressForm(false)
             }
         }
     }
@@ -125,7 +129,12 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
             quantity: item.quantity,
         }))
 
-        const result = await createOrder(address, checkoutItems)
+        const result = await createOrder(
+            address, 
+            checkoutItems,
+            selectedAddressId === "new" ? saveAddressForFuture : false,
+            selectedAddressId !== "new" ? selectedAddressId : undefined
+        )
 
         if (result.error) {
             toast.error(result.error)
@@ -191,9 +200,9 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
                             <h2 className="text-lg font-semibold text-neutral-900">Shipping Address</h2>
 
                             {/* Saved Address Selector */}
-                            {savedAddresses.length > 0 && (
+                            {savedAddresses.length > 0 && !showAddressForm && (
                                 <div className="space-y-3">
-                                    <p className="text-sm font-medium text-muted-foreground">Select a saved address</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Select a saved address or add new</p>
                                     <div className="grid gap-2">
                                         {savedAddresses.map((a) => (
                                             <button
@@ -230,8 +239,19 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
                             )}
 
                             {/* Manual Address Form — shown when 'new' selected or no saved addresses */}
-                            {(selectedAddressId === "new" || savedAddresses.length === 0) && (
+                            {showAddressForm && (
                                 <>
+                                    {selectedAddressId === "new" && savedAddresses.length > 0 && (
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            onClick={() => setShowAddressForm(false)}
+                                            className="mb-4"
+                                        >
+                                            ← Back to Address List
+                                        </Button>
+                                    )}
+
                                     <div>
                                         <Label htmlFor="fullName">Full Name *</Label>
                                         <Input id="fullName" name="fullName" value={address.fullName} onChange={handleAddressChange} required />
@@ -298,6 +318,21 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
                                             />
                                         </div>
                                     </div>
+
+                                    {selectedAddressId === "new" && (
+                                        <div className="flex items-center gap-2 bg-neutral-50 p-3 rounded-lg">
+                                            <input 
+                                                type="checkbox" 
+                                                id="saveAddress"
+                                                checked={saveAddressForFuture}
+                                                onChange={(e) => setSaveAddressForFuture(e.target.checked)}
+                                                className="rounded border-neutral-300"
+                                            />
+                                            <label htmlFor="saveAddress" className="text-sm text-neutral-600">
+                                                Save this address for future use
+                                            </label>
+                                        </div>
+                                    )}
                                 </>
                             )}
 
@@ -340,7 +375,7 @@ export function CheckoutForm({ savedAddresses = [] }: CheckoutFormProps) {
                                 <h3 className="text-sm font-semibold text-neutral-900">Items ({items.length})</h3>
                                 {items.map((item) => (
                                     <div key={`${item.productId}-${item.variantId}`} className="flex items-center gap-3">
-                                        <div className="relative h-12 w-12 rounded-lg bg-neutral-100 overflow-hidden flex-shrink-0">
+                                        <div className="relative h-12 w-12 rounded-lg bg-neutral-100 overflow-hidden shrink-0">
                                             {item.image ? (
                                                 <Image src={item.image} alt={item.name} fill className="object-cover" sizes="48px" />
                                             ) : (

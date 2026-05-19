@@ -13,9 +13,9 @@ export default async function NewProductPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center">
-                <h1 className="text-2xl font-bold tracking-tight">New Product</h1>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight">New Product</h1>
             </div>
-            <div className="border rounded-lg p-6 bg-card">
+            <div className="border rounded-lg p-4 sm:p-6 bg-card">
                 <ProductForm categories={(categories as unknown as Category[]) || []} />
             </div>
         </div>

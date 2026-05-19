@@ -66,9 +66,8 @@ export interface Product {
     category_id: string | null
     is_active: boolean
     is_featured: boolean
-    ingredients: string | null
-    certifications: string[] | null
-    benefits: string | null
+    is_quote_only: boolean
+    specifications: Record<string, string | number | boolean> | null
     stock_quantity: number
     sku: string
     expiry_date: string | null

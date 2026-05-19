@@ -6,6 +6,7 @@ import { ProductFilters } from "@/components/features/product/product-filters"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ProductWithImages } from "@/types"
 import { getWishlistIds } from "@/app/actions/wishlist"
+import { fuzzyMatchScore } from "@/lib/utils/search"
 import Link from "next/link"
 import { X, ArrowRight } from "lucide-react"
 
@@ -43,9 +44,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         .select('*, images:product_images(*)')
         .eq('is_active', true)
 
-    if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%`)
-    }
+    // Note: We no longer do database-level .ilike search for the main query.
+    // We will do a much smarter fuzzy search in-memory below!
 
     if (categoryFilter) {
         const { data: cat } = await supabase
@@ -89,10 +89,28 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 .order('created_at', { ascending: false })
     }
 
-    const { data: products, error } = await query
+    const { data: rawProducts, error } = await query
 
     if (error) {
         console.error('Error fetching products:', error)
+    }
+
+    let products = rawProducts || []
+
+    // Fuzzy Search Application
+    if (searchQuery && products.length > 0) {
+        const scoredProducts = products.map((p) => {
+            const target = `${p.name} ${p.description || ""} ${p.sku || ""}`
+            const score = fuzzyMatchScore(searchQuery, target)
+            return { ...p, _fuzzyScore: score }
+        }).filter((p) => p._fuzzyScore !== -1)
+
+        // If the user didn't specify a sort, sort by relevance (best score first)
+        if (!sortBy || sortBy === "") {
+            scoredProducts.sort((a, b) => a._fuzzyScore - b._fuzzyScore)
+        }
+        
+        products = scoredProducts
     }
 
     // Fetch categories
@@ -164,7 +182,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         </div>
                     ) : (
                         <p className="text-xl text-muted-foreground max-w-2xl">
-                            Discover our range of natural hygiene products, crafted with care for your well-being.
+                            Discover our premium selection of heavy-duty industrial machinery, tools, and equipment engineered for ultimate reliability.
                         </p>
                     )}
                 </div>
@@ -213,7 +231,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                                                     {group.category?.name || "Other Products"}
                                                 </h2>
                                                 <p className="mt-1 text-sm text-muted-foreground">
-                                                    {group.products.length} product{group.products.length !== 1 ? "s" : ""}
+                                                    {group.products.length > 3 
+                                                        ? `Showing 3 of ${group.products.length} products`
+                                                        : `${group.products.length} product${group.products.length !== 1 ? "s" : ""}`
+                                                    }
                                                 </p>
                                             </div>
                                             {group.category && (
@@ -221,11 +242,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                                                     href={`/products?category=${group.category.slug}`}
                                                     className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
                                                 >
-                                                    View all <ArrowRight className="h-3.5 w-3.5" />
+                                                    View all {group.products.length > 3 && `(${group.products.length})`} <ArrowRight className="h-3.5 w-3.5" />
                                                 </Link>
                                             )}
                                         </div>
-                                        <ProductGrid products={group.products} wishlistIds={wishlistIds} />
+                                        <ProductGrid products={group.products.slice(0, 3)} wishlistIds={wishlistIds} />
                                     </section>
                                 ))}
                             </div>

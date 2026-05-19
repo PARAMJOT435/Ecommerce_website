@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Linkedin, Settings } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/ui/logo";
 import { NewsletterForm } from "@/components/forms/newsletter-form";
 
 export function Footer() {
@@ -13,11 +14,11 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* Brand Info */}
                     <div className="space-y-4">
-                        <Link href="/" className="font-heading text-2xl font-bold text-primary-600">
-                            fewofmany
+                        <Link href="/" className="flex items-center">
+                            <Logo iconSize="h-12 w-12" textSize="text-xl" bgClass="bg-neutral-50" />
                         </Link>
                         <p className="text-sm text-muted-foreground max-w-xs">
-                            Natural Strength of Gentle Ingredients. Premium hygiene products designed for your well-being.
+                            Heavy-Duty Tools for Industrial Precision. Premium machinery and equipment engineered for reliability.
                         </p>
                         <div className="flex space-x-4">
                             <Link href="#" className="text-muted-foreground hover:text-primary-600">
@@ -49,18 +50,18 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/products?category=hair-care" className="text-muted-foreground hover:text-primary-600">
-                                    Hair Care
+                                <Link href="/products?category=power-tools" className="text-muted-foreground hover:text-primary-600">
+                                    Power Tools
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/products?category=skin-care" className="text-muted-foreground hover:text-primary-600">
-                                    Skin Care
+                                <Link href="/products?category=hand-tools" className="text-muted-foreground hover:text-primary-600">
+                                    Hand Tools
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/products?category=intimate" className="text-muted-foreground hover:text-primary-600">
-                                    Intimate Hygiene
+                                <Link href="/products?category=machinery" className="text-muted-foreground hover:text-primary-600">
+                                    Machinery
                                 </Link>
                             </li>
                         </ul>
@@ -106,7 +107,7 @@ export function Footer() {
                 <Separator className="my-8" />
 
                 <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} fewofmany. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} MMW. All rights reserved.</p>
                     <div className="flex space-x-4 mt-4 md:mt-0">
                         <Link href="/terms" className="hover:text-foreground">Terms</Link>
                         <Link href="/privacy" className="hover:text-foreground">Privacy</Link>

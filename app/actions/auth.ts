@@ -89,3 +89,19 @@ export async function resetPassword(formData: FormData) {
 
     return { success: 'Check your email for a password reset link.' }
 }
+
+export async function checkEmailExists(email: string): Promise<boolean> {
+    const supabase = await createServerClient()
+    
+    try {
+        const { data, error } = await supabase.rpc('check_email_exists', { lookup_email: email })
+        if (error) {
+            console.error('Error checking email:', error)
+            return false
+        }
+        return !!data
+    } catch (e) {
+        console.error('Error checking email:', e)
+        return false
+    }
+}

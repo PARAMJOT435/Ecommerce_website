@@ -7,36 +7,36 @@ import { Leaf, Heart, Shield, Sparkles, ArrowRight } from "lucide-react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "About Us | fewofmany",
-    description: "Learn about fewofmany — our mission to bring natural, gentle, and effective hygiene products to every household.",
+    title: "About Us | MMW",
+    description: "Learn about MMW — our mission to bring high-quality, durable, and reliable industrial tools to every workshop.",
 }
 
 const VALUES = [
     {
-        icon: Leaf,
-        title: "Natural Ingredients",
-        description: "We source only the finest natural ingredients, ensuring each product is gentle yet effective. No harsh chemicals, no compromises.",
-        color: "text-green-600",
-        bg: "bg-green-50",
-    },
-    {
-        icon: Heart,
-        title: "Cruelty-Free",
-        description: "We never test on animals. Every product is developed with compassion and care for all living beings.",
-        color: "text-pink-600",
-        bg: "bg-pink-50",
-    },
-    {
         icon: Shield,
-        title: "Dermatologist Tested",
-        description: "All products undergo rigorous dermatological testing to ensure they're safe and suitable for sensitive skin.",
+        title: "Durable Materials",
+        description: "We source only the finest industrial-grade materials, ensuring each tool is durable and reliable.",
         color: "text-blue-600",
         bg: "bg-blue-50",
     },
     {
         icon: Sparkles,
-        title: "Eco-Friendly",
-        description: "From formulation to packaging, we minimize our environmental footprint. Recyclable materials, biodegradable formulas.",
+        title: "Precision Engineering",
+        description: "Every product is developed with precision and care for the most demanding applications.",
+        color: "text-orange-600",
+        bg: "bg-orange-50",
+    },
+    {
+        icon: Shield,
+        title: "Quality Tested",
+        description: "All products undergo rigorous testing to ensure they meet the highest industrial standards.",
+        color: "text-slate-600",
+        bg: "bg-slate-50",
+    },
+    {
+        icon: Sparkles,
+        title: "Reliable Performance",
+        description: "From design to manufacturing, we focus on delivering tools that perform day in and day out.",
         color: "text-teal-600",
         bg: "bg-teal-50",
     },
@@ -53,14 +53,11 @@ export default function AboutPage() {
                             Our Story
                         </span>
                         <h1 className="text-4xl md:text-5xl font-heading font-bold text-neutral-900 leading-tight">
-                            Natural Strength of{" "}
-                            <span className="text-primary-600">Gentle Ingredients</span>
+                            Heavy-Duty Tools for{" "}
+                            <span className="text-primary-600">Industrial Precision</span>
                         </h1>
                         <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                            At fewofmany, we believe that personal hygiene shouldn&apos;t come at the cost
-                            of your health or the environment. We craft premium products using nature&apos;s
-                            finest ingredients — gentle enough for daily use, powerful enough to make a
-                            real difference.
+                            At MMW, we believe that industrial work requires the best equipment. We craft premium tools using the finest materials — durable enough for heavy duty use, reliable enough to make a real difference.
                         </p>
                     </div>
                 </Container>
@@ -75,33 +72,33 @@ export default function AboutPage() {
                                 Our Mission
                             </span>
                             <h2 className="mt-2 text-3xl font-heading font-bold text-neutral-900">
-                                Hygiene That Cares
+                                Tools That Perform
                             </h2>
                             <p className="mt-4 text-muted-foreground leading-relaxed">
-                                We started fewofmany with a simple idea: everyone deserves access to
-                                hygiene products that are safe, effective, and environmentally responsible.
+                                We started MMW with a simple idea: everyone deserves access to
+                                industrial equipment that is safe, effective, and reliable.
                             </p>
                             <p className="mt-3 text-muted-foreground leading-relaxed">
-                                Every product in our range is thoughtfully formulated with natural
-                                ingredients, free from parabens, sulfates, and artificial fragrances.
-                                We work with dermatologists and chemists to ensure every formula meets
+                                Every product in our range is thoughtfully engineered with durable
+                                materials, free from defects and built to last.
+                                We work with engineers and mechanics to ensure every tool meets
                                 the highest standards of safety and efficacy.
                             </p>
                             <p className="mt-3 text-muted-foreground leading-relaxed">
-                                From our vitamin-C enriched face washes to our intimate hygiene range,
-                                each product is designed to make you feel clean, fresh, and confident —
-                                naturally.
+                                From our precision machinery to our heavy-duty hand tools,
+                                each product is designed to help you build, repair, and create —
+                                flawlessly.
                             </p>
                         </div>
 
                         <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-primary-100 to-teal-100 flex items-center justify-center">
                             <div className="text-center p-8">
-                                <Leaf className="mx-auto h-16 w-16 text-primary-500 mb-4" />
+                                <Shield className="mx-auto h-16 w-16 text-primary-500 mb-4" />
                                 <p className="text-2xl font-heading font-bold text-primary-800">
-                                    fewofmany
+                                    MMW
                                 </p>
                                 <p className="text-sm text-primary-600 mt-1">
-                                    Natural Strength · Gentle Care
+                                    Heavy-Duty · Precision Engineered
                                 </p>
                             </div>
                         </div>
@@ -150,7 +147,7 @@ export default function AboutPage() {
                             Ready to Experience the Difference?
                         </h2>
                         <p className="mt-3 text-primary-100 max-w-xl mx-auto">
-                            Explore our range of natural hygiene products and find the perfect fit for your routine.
+                            Explore our range of industrial tools and machinery and find the perfect fit for your factory.
                         </p>
                         <Button asChild size="lg" className="mt-6 bg-white text-primary-700 hover:bg-primary-50 gap-2">
                             <Link href="/products">

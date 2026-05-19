@@ -36,8 +36,8 @@ const productSchema = z.object({
     base_price: z.coerce.number().min(0, "Price must be positive"),
     stock_quantity: z.coerce.number().int().min(0, "Stock must be non-negative"),
     sku: z.string().min(3, "SKU is required"),
-    ingredients: z.string().optional(),
-    benefits: z.string().optional(),
+    specifications: z.string().optional(),
+    is_quote_only: z.boolean().default(false),
     is_active: z.boolean().default(true),
     is_featured: z.boolean().default(false),
     category_id: z.string().optional(),
@@ -62,8 +62,8 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
             base_price: initialData?.base_price ?? 0,
             stock_quantity: initialData?.stock_quantity ?? 0,
             sku: initialData?.sku || "",
-            ingredients: initialData?.ingredients || "",
-            benefits: initialData?.benefits || "",
+            specifications: initialData?.specifications ? JSON.stringify(initialData.specifications, null, 2) : "{\n  \n}",
+            is_quote_only: initialData?.is_quote_only ?? false,
             is_active: initialData?.is_active ?? true,
             is_featured: initialData?.is_featured ?? false,
             category_id: initialData?.category_id || "",
@@ -238,34 +238,26 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                     )}
                 />
 
-                <div className="grid gap-4 md:grid-cols-2">
-                    <FormField
-                        control={form.control}
-                        name="ingredients"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Ingredients</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Comma separated ingredients" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="benefits"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Benefits</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Key benefits" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                <FormField
+                    control={form.control}
+                    name="specifications"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Technical Specifications (JSON format)</FormLabel>
+                            <FormControl>
+                                <Textarea 
+                                    className="font-mono h-32" 
+                                    placeholder='{\n  "Voltage": "220V",\n  "Weight": "400 lbs"\n}' 
+                                    {...field} 
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                Enter specifications as valid JSON.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
@@ -300,6 +292,29 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                     <FormField
                         control={form.control}
                         name="is_featured"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 border-amber-200 bg-amber-50/50">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base text-amber-900">Request Quote Only (B2B)</FormLabel>
+                        <FormDescription className="text-amber-700">
+                            Hide "Add to Cart" and show "Request Quote" modal
+                        </FormDescription>
+                    </div>
+                    <FormField
+                        control={form.control}
+                        name="is_quote_only"
                         render={({ field }) => (
                             <FormItem>
                                 <FormControl>

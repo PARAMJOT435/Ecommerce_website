@@ -20,18 +20,107 @@ export function ReviewForm({ productId, isLoggedIn }: ReviewFormProps) {
     const [title, setTitle] = useState("")
     const [comment, setComment] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [userStatus, setUserStatus] = useState<'not-logged-in' | 'not-purchased' | 'not-delivered' | 'admin' | 'already-reviewed' | 'eligible'>('not-logged-in')
+    const [isLoading, setIsLoading] = useState(true)
+
+    // Check user eligibility on component mount
+    React.useEffect(() => {
+        const checkEligibility = async () => {
+            try {
+                const response = await fetch('/api/auth/check-admin')
+                const adminData = await response.json()
+
+                if (adminData.isAdmin) {
+                    setUserStatus('admin')
+                    setIsLoading(false)
+                    return
+                }
+
+                // If not admin, check if they have ordered this product
+                const userResponse = await fetch(`/api/reviews/check-eligibility?productId=${productId}`)
+                const eligibilityData = await userResponse.json()
+
+                if (!eligibilityData.isLoggedIn) {
+                    setUserStatus('not-logged-in')
+                } else if (eligibilityData.hasReviewed) {
+                    setUserStatus('already-reviewed')
+                } else if (!eligibilityData.hasPurchased) {
+                    setUserStatus('not-purchased')
+                } else if (!eligibilityData.isDelivered) {
+                    setUserStatus('not-delivered')
+                } else {
+                    setUserStatus('eligible')
+                }
+            } catch (error) {
+                setUserStatus('not-logged-in')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        checkEligibility()
+    }, [productId])
+
+    if (isLoading) {
+        return null
+    }
 
     if (!isLoggedIn) {
-        return (
-            <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                    <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700">
-                        Log in
-                    </Link>{" "}
-                    to write a review
-                </p>
-            </div>
-        )
+        if (userStatus === 'not-logged-in') {
+            return (
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
+                    <p className="text-sm text-muted-foreground">
+                        <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700">
+                            Log in
+                        </Link>{" "}
+                        to write a review
+                    </p>
+                </div>
+            )
+        }
+
+        if (userStatus === 'admin') {
+            return (
+                <div className="rounded-xl border border-orange-200 bg-orange-50 p-6">
+                    <p className="text-sm text-orange-900">
+                        Admin accounts cannot submit reviews.
+                    </p>
+                </div>
+            )
+        }
+
+        if (userStatus === 'already-reviewed') {
+            return (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-6">
+                    <p className="text-sm font-medium text-green-900 mb-2">Already Reviewed</p>
+                    <p className="text-sm text-green-800">
+                        You have already submitted a review for this product. Thank you for your feedback!
+                    </p>
+                </div>
+            )
+        }
+
+        if (userStatus === 'not-purchased') {
+            return (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
+                    <p className="text-sm font-medium text-amber-900 mb-2">Cannot Review</p>
+                    <p className="text-sm text-amber-800">
+                        You must purchase this product to write a review. Only verified buyers can share their experience.
+                    </p>
+                </div>
+            )
+        }
+
+        if (userStatus === 'not-delivered') {
+            return (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+                    <p className="text-sm font-medium text-blue-900 mb-2">Review Coming Soon</p>
+                    <p className="text-sm text-blue-800">
+                        You can write a review once your order has been delivered. Come back after receiving your product!
+                    </p>
+                </div>
+            )
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {

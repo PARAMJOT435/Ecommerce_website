@@ -2,10 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { ShoppingBag, User, Search, Menu, LogOut, Package, Heart, LayoutDashboard } from "lucide-react";
-import { useState } from "react";
+import { ShoppingBag, User, Search, Menu, LogOut, Package, Heart, LayoutDashboard, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { Logo } from "@/components/ui/logo";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -32,61 +33,112 @@ interface HeaderProps {
 
 export function Header({ user, isAdmin }: HeaderProps) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
     const totalItems = useCartStore((s) => s.totalItems);
     const openCart = useUIStore((s) => s.openCart);
 
-    const cartCount = totalItems();
+    useEffect(() => {
+        setIsMounted(true);
+        setCartCount(totalItems());
+    }, [totalItems]);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <Container className="flex h-16 items-center">
                 {/* Mobile Menu */}
-                <Sheet>
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="mr-2 md:hidden">
                             <Menu className="h-5 w-5" />
                             <span className="sr-only">Toggle menu</span>
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="left">
-                        <nav className="flex flex-col gap-4">
-                            <Link href="/" className="font-heading text-lg font-semibold">
-                                fewofmany
+                    <SheetContent side="left" className="flex flex-col p-0 w-72">
+                        <div className="flex items-center border-b p-4 h-16">
+                            <Link href="/" className="flex items-center" onClick={() => setIsSheetOpen(false)}>
+                                <Logo />
                             </Link>
+                        </div>
+                        
+                        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
                             {isAdmin && (
-                                <Link href="/admin/dashboard" className="text-primary-600 font-medium hover:text-primary-700">
+                                <Link 
+                                    href="/admin/dashboard" 
+                                    onClick={() => setIsSheetOpen(false)}
+                                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors"
+                                >
+                                    <LayoutDashboard className="h-5 w-5" />
                                     Admin Dashboard
                                 </Link>
                             )}
-                            <Link href="/products" className="text-muted-foreground hover:text-foreground">
+                            
+                            <div className="pt-2 pb-1">
+                                <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Store</p>
+                            </div>
+                            
+                            <Link 
+                                href="/products" 
+                                onClick={() => setIsSheetOpen(false)}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                            >
+                                <Package className="h-5 w-5 text-muted-foreground" />
                                 Products
                             </Link>
-                            <Link href="/about" className="text-muted-foreground hover:text-foreground">
-                                About
+                            <Link 
+                                href="/about" 
+                                onClick={() => setIsSheetOpen(false)}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                            >
+                                <Heart className="h-5 w-5 text-muted-foreground" />
+                                Our Story
                             </Link>
-                            <Link href="/blog" className="text-muted-foreground hover:text-foreground">
+                            <Link 
+                                href="/blog" 
+                                onClick={() => setIsSheetOpen(false)}
+                                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                            >
+                                <Search className="h-5 w-5 text-muted-foreground" />
                                 Blog
                             </Link>
-                            {!user && (
-                                <>
-                                    <Link href="/login" className="text-muted-foreground hover:text-foreground">
-                                        Sign In
-                                    </Link>
-                                    <Link href="/signup" className="text-muted-foreground hover:text-foreground">
-                                        Sign Up
-                                    </Link>
-                                </>
-                            )}
                         </nav>
+
+                        <div className="border-t p-4 bg-muted/20">
+                            {user ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 px-2">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold">
+                                            {user.firstName ? user.firstName[0].toUpperCase() : user.email[0].toUpperCase()}
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium leading-none">{user.firstName || 'Account'}</span>
+                                            <span className="text-xs text-muted-foreground mt-1 truncate max-w-[150px]">{user.email}</span>
+                                        </div>
+                                    </div>
+                                    <form action={logout}>
+                                        <Button type="submit" variant="outline" className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                                            <LogOut className="h-4 w-4" />
+                                            Sign Out
+                                        </Button>
+                                    </form>
+                                </div>
+                            ) : (
+                                <Button className="w-full bg-primary-600 hover:bg-primary-700 text-white" asChild onClick={() => setIsSheetOpen(false)}>
+                                    <Link href="/login">
+                                        <User className="mr-2 h-4 w-4" />
+                                        Sign In / Sign Up
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
                     </SheetContent>
                 </Sheet>
 
                 {/* Logo */}
                 <div className="mr-4 flex">
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <span className="font-heading text-xl font-bold text-primary-600">
-                            fewofmany
-                        </span>
+                    <Link href="/" className="mr-6 flex items-center">
+                        <Logo iconSize="h-10 w-10" textSize="text-base" />
                     </Link>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
                         {isAdmin && (
@@ -109,7 +161,7 @@ export function Header({ user, isAdmin }: HeaderProps) {
                 {/* Actions */}
                 <div className="flex flex-1 items-center justify-end space-x-2">
                     {/* Search */}
-                    <div className="w-full flex-1 md:w-auto md:flex-none">
+                    <div className="flex items-center md:flex-none">
                         <div className="hidden md:block">
                             <SearchBar />
                         </div>
@@ -135,7 +187,7 @@ export function Header({ user, isAdmin }: HeaderProps) {
                                     onClick={openCart}
                                 >
                                     <ShoppingBag className="h-5 w-5" />
-                                    {cartCount > 0 && (
+                                    {isMounted && cartCount > 0 && (
                                         <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary-600 text-[10px] text-white">
                                             {cartCount > 9 ? '9+' : cartCount}
                                         </span>
@@ -226,12 +278,9 @@ export function Header({ user, isAdmin }: HeaderProps) {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <div className="hidden md:flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" asChild>
-                                <Link href="/login">Sign In</Link>
-                            </Button>
+                        <div className="hidden md:flex items-center">
                             <Button size="sm" className="bg-primary-600 hover:bg-primary-700 text-white" asChild>
-                                <Link href="/signup">Sign Up</Link>
+                                <Link href="/login">Sign In / Sign Up</Link>
                             </Button>
                         </div>
                     )}

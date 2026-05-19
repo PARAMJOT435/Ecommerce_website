@@ -52,9 +52,21 @@ export async function createProduct(formData: FormData) {
         const sku = formData.get("sku") as string
         const is_active = formData.get("is_active") === "true"
         const is_featured = formData.get("is_featured") === "true"
+        const is_quote_only = formData.get("is_quote_only") === "true"
         const category_id = formData.get("category_id") as string
         const imageUrl = formData.get("imageUrl") as string
         const imageFile = formData.get("imageFile") as File | null
+        
+        let specifications = {}
+        try {
+            const specsRaw = formData.get("specifications") as string
+            if (specsRaw && specsRaw.trim() !== "") {
+                specifications = JSON.parse(specsRaw)
+            }
+        } catch (e) {
+            console.error("Invalid JSON for specifications", e)
+            return { error: "Specifications must be valid JSON" }
+        }
 
         const slug = generateSlug(name)
 
@@ -70,10 +82,9 @@ export async function createProduct(formData: FormData) {
                 sku,
                 is_active,
                 is_featured,
+                is_quote_only,
                 category_id: category_id || null,
-                // Default values for other fields
-                ingredients: formData.get("ingredients") as string,
-                benefits: formData.get("benefits") as string,
+                specifications,
             })
             .select()
             .single()
@@ -130,9 +141,21 @@ export async function updateProduct(id: string, formData: FormData) {
         const sku = formData.get("sku") as string
         const is_active = formData.get("is_active") === "true"
         const is_featured = formData.get("is_featured") === "true"
+        const is_quote_only = formData.get("is_quote_only") === "true"
         const category_id = formData.get("category_id") as string
         const imageUrl = formData.get("imageUrl") as string
         const imageFile = formData.get("imageFile") as File | null
+
+        let specifications = {}
+        try {
+            const specsRaw = formData.get("specifications") as string
+            if (specsRaw && specsRaw.trim() !== "") {
+                specifications = JSON.parse(specsRaw)
+            }
+        } catch (e) {
+            console.error("Invalid JSON for specifications", e)
+            return { error: "Specifications must be valid JSON" }
+        }
 
         // Update Product
         const { error: productError } = await supabase
@@ -145,9 +168,9 @@ export async function updateProduct(id: string, formData: FormData) {
                 sku,
                 is_active,
                 is_featured,
+                is_quote_only,
                 category_id: category_id || null,
-                ingredients: formData.get("ingredients") as string,
-                benefits: formData.get("benefits") as string,
+                specifications,
                 updated_at: new Date().toISOString()
             })
             .eq("id", id)

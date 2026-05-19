@@ -151,7 +151,10 @@ export default function CartPage() {
                         <div className="flex gap-2 justify-end">
                             <Button variant="outline" onClick={() => setShowClearConfirm(false)}>Keep Items</Button>
                             <Button
-                                onClick={handleClearCartConfirm}
+                                onClick={() => {
+                                    setShowClearConfirm(false)
+                                    clearCart()
+                                }}
                                 className="bg-red-600 hover:bg-red-700 text-white"
                             >
                                 Clear Cart
@@ -162,9 +165,4 @@ export default function CartPage() {
             )}
         </Container>
     )
-}
-
-const handleClearCartConfirm = () => {
-    setShowClearConfirm(false)
-    clearCart()
 }

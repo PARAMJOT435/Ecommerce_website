@@ -8,8 +8,8 @@ import {
 import Link from "next/link"
 
 export const metadata = {
-    title: "FAQs | fewofmany",
-    description: "Frequently asked questions about fewofmany products, orders, shipping, and returns.",
+    title: "FAQs | MMW",
+    description: "Frequently asked questions about MMW products, orders, shipping, and returns.",
 }
 
 const faqCategories = [
@@ -64,7 +64,7 @@ const faqCategories = [
             },
             {
                 q: "How do I initiate a return?",
-                a: "Contact us at hello@fewofmany.com with your order number and reason for return. We'll arrange a pickup and process the refund once we receive the product.",
+                a: "Contact us at hello@MMW.com with your order number and reason for return. We'll arrange a pickup and process the refund once we receive the product.",
             },
             {
                 q: "When will I receive my refund?",
@@ -76,16 +76,16 @@ const faqCategories = [
         title: "Products",
         items: [
             {
-                q: "Are your products natural/organic?",
-                a: "Yes, all fewofmany products are made with naturally derived ingredients. We avoid parabens, sulfates, and harsh chemicals. Check individual product pages for full ingredient lists.",
+                q: "Are your tools suitable for heavy-duty industrial use?",
+                a: "Yes, all MMW tools are manufactured with industrial-grade materials built for continuous, heavy-duty applications. Check individual product pages for load ratings and specifications.",
             },
             {
-                q: "Are your products tested on animals?",
-                a: "No. fewofmany is 100% cruelty-free. We never test on animals and none of our suppliers do either.",
+                q: "Do your products come with a warranty?",
+                a: "Yes. MMW provides a standard 1-year manufacturing warranty on all power tools and heavy machinery against defects in materials and workmanship.",
             },
             {
-                q: "Can I use your products if I have sensitive skin?",
-                a: "Our products are formulated with gentle, skin-friendly ingredients. However, if you have specific allergies, we recommend checking the ingredient list or doing a patch test first.",
+                q: "Do you offer bulk discounts or wholesale pricing?",
+                a: "Absolutely. We offer tiered pricing for bulk orders. Please contact our sales team for a custom quote on large orders.",
             },
         ],
     },

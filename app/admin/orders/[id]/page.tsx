@@ -39,13 +39,13 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     return (
         <div className="flex flex-col gap-6">
             {/* Header */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
                     <Link href="/admin/orders"><ArrowLeft className="h-4 w-4" /></Link>
                 </Button>
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold tracking-tight font-mono">{order.order_number}</h1>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight font-mono">{order.order_number}</h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(order.created_at).toLocaleDateString("en-IN", {
                             day: "numeric",
@@ -56,29 +56,30 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                         })}
                     </p>
                 </div>
-                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium capitalize ${STATUS_COLORS[order.status] || ""}`}>
+                <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium capitalize ${STATUS_COLORS[order.status] || ""}`}>
                     {order.status}
                 </span>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+            <div className="grid gap-6 lg:grid-cols-[1fr_320px] flex-col-reverse lg:flex-row">
                 {/* Main Content */}
                 <div className="space-y-6">
                     {/* Items */}
                     <div className="rounded-lg border border-neutral-200 overflow-hidden">
-                        <div className="bg-neutral-50 px-4 py-3 flex items-center gap-2">
-                            <Package className="h-4 w-4 text-muted-foreground" />
-                            <h2 className="text-sm font-semibold">Order Items</h2>
+                        <div className="bg-neutral-50 px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2">
+                            <Package className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground" />
+                            <h2 className="text-xs sm:text-sm font-semibold">Order Items</h2>
                         </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Product</TableHead>
-                                    <TableHead className="text-center">Qty</TableHead>
-                                    <TableHead className="text-right">Unit Price</TableHead>
-                                    <TableHead className="text-right">Total</TableHead>
-                                </TableRow>
-                            </TableHeader>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead className="text-center">Qty</TableHead>
+                                        <TableHead className="text-right">Unit Price</TableHead>
+                                        <TableHead className="text-right">Total</TableHead>
+                                    </TableRow>
+                                </TableHeader>
                             <TableBody>
                                 {items.map((item: any) => {
                                     const imgUrl = item.product?.images?.find((i: any) => i.is_primary)?.image_url
@@ -86,28 +87,29 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                     return (
                                         <TableRow key={item.id}>
                                             <TableCell>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="relative h-10 w-10 rounded bg-neutral-100 overflow-hidden flex-shrink-0">
+                                                <div className="flex items-center gap-2 sm:gap-3">
+                                                    <div className="relative h-8 sm:h-10 w-8 sm:w-10 rounded bg-neutral-100 overflow-hidden shrink-0">
                                                         {imgUrl ? (
                                                             <Image src={imgUrl} alt={item.product_name} fill className="object-cover" sizes="40px" />
                                                         ) : (
-                                                            <div className="flex h-full w-full items-center justify-center text-[8px] text-neutral-400">N/A</div>
+                                                            <div className="flex h-full w-full items-center justify-center text-[6px] sm:text-[8px] text-neutral-400">N/A</div>
                                                         )}
                                                     </div>
-                                                    <span className="text-sm font-medium">{item.product_name}</span>
+                                                    <span className="text-xs sm:text-sm font-medium">{item.product_name}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-center">{item.quantity}</TableCell>
-                                            <TableCell className="text-right">₹{parseFloat(item.unit_price).toFixed(2)}</TableCell>
-                                            <TableCell className="text-right font-medium">₹{parseFloat(item.total_price).toFixed(2)}</TableCell>
+                                            <TableCell className="text-center text-xs sm:text-sm">{item.quantity}</TableCell>
+                                            <TableCell className="text-right text-xs sm:text-sm">₹{parseFloat(item.unit_price).toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-medium text-xs sm:text-sm">₹{parseFloat(item.total_price).toFixed(2)}</TableCell>
                                         </TableRow>
                                     )
                                 })}
                             </TableBody>
                         </Table>
+                        </div>
 
                         {/* Totals */}
-                        <div className="border-t px-4 py-3 space-y-1 text-sm">
+                        <div className="border-t px-3 sm:px-4 py-2 sm:py-3 space-y-1 text-xs sm:text-sm">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Subtotal</span>
                                 <span>₹{parseFloat(order.subtotal).toFixed(2)}</span>
@@ -135,17 +137,17 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                     </div>
 
                     {/* Customer & Address */}
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                         {/* Customer */}
-                        <div className="rounded-lg border border-neutral-200 p-4">
+                        <div className="rounded-lg border border-neutral-200 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold">Customer</h3>
+                                <User className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground" />
+                                <h3 className="text-xs sm:text-sm font-semibold">Customer</h3>
                             </div>
                             {customer ? (
-                                <div className="text-sm space-y-1">
+                                <div className="text-xs sm:text-sm space-y-1">
                                     <p className="font-medium">{customer.first_name} {customer.last_name}</p>
-                                    <p className="text-muted-foreground">{customer.email}</p>
+                                    <p className="text-muted-foreground break-all">{customer.email}</p>
                                     {customer.phone && <p className="text-muted-foreground">{customer.phone}</p>}
                                     <Link
                                         href={`/admin/customers/${customer.id}`}
@@ -155,18 +157,18 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                     </Link>
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground">Customer data unavailable</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">Customer data unavailable</p>
                             )}
                         </div>
 
                         {/* Address */}
-                        <div className="rounded-lg border border-neutral-200 p-4">
+                        <div className="rounded-lg border border-neutral-200 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold">Shipping Address</h3>
+                                <MapPin className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground" />
+                                <h3 className="text-xs sm:text-sm font-semibold">Shipping Address</h3>
                             </div>
                             {address ? (
-                                <div className="text-sm space-y-0.5">
+                                <div className="text-xs sm:text-sm space-y-0.5">
                                     <p className="font-medium">{address.full_name}</p>
                                     <p className="text-muted-foreground">{address.address_line1}</p>
                                     {address.address_line2 && <p className="text-muted-foreground">{address.address_line2}</p>}
@@ -174,19 +176,19 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                     {address.phone && <p className="text-muted-foreground">{address.phone}</p>}
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground">Address unavailable</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">Address unavailable</p>
                             )}
                         </div>
                     </div>
 
                     {/* Payment Info */}
                     {payment && (
-                        <div className="rounded-lg border border-neutral-200 p-4">
+                        <div className="rounded-lg border border-neutral-200 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold">Payment</h3>
+                                <CreditCard className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground" />
+                                <h3 className="text-xs sm:text-sm font-semibold">Payment</h3>
                             </div>
-                            <div className="text-sm space-y-1">
+                            <div className="text-xs sm:text-sm space-y-1">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Method</span>
                                     <span className="capitalize">{payment.payment_method}</span>
@@ -202,7 +204,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                 {payment.razorpay_payment_id && (
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">Razorpay ID</span>
-                                        <span className="font-mono text-xs">{payment.razorpay_payment_id}</span>
+                                        <span className="font-mono text-xs break-all">{payment.razorpay_payment_id}</span>
                                     </div>
                                 )}
                             </div>
@@ -211,19 +213,19 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
                     {/* Shipment Info */}
                     {shipment && (
-                        <div className="rounded-lg border border-neutral-200 p-4">
+                        <div className="rounded-lg border border-neutral-200 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <Truck className="h-4 w-4 text-muted-foreground" />
-                                <h3 className="text-sm font-semibold">Shipment</h3>
+                                <Truck className="h-3 sm:h-4 w-3 sm:w-4 text-muted-foreground" />
+                                <h3 className="text-xs sm:text-sm font-semibold">Shipment</h3>
                             </div>
-                            <div className="text-sm space-y-1">
+                            <div className="text-xs sm:text-sm space-y-1">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Carrier</span>
                                     <span>{shipment.carrier || "—"}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Tracking #</span>
-                                    <span className="font-mono text-xs">{shipment.tracking_number || "—"}</span>
+                                    <span className="font-mono text-xs break-all">{shipment.tracking_number || "—"}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Status</span>

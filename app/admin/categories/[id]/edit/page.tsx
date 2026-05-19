@@ -30,7 +30,7 @@ export default async function EditCategoryPage({ params }: EditCategoryPageProps
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold tracking-tight">Edit Category</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Edit Category</h1>
             <CategoryForm
                 categories={parentOptions}
                 action={handleUpdate}

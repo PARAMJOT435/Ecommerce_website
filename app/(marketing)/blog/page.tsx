@@ -7,8 +7,8 @@ import { getBlogPosts } from "@/app/actions/blog"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Blog | fewofmany",
-    description: "Tips, guides, and insights on natural hygiene and wellness from fewofmany.",
+    title: "Blog | MMW",
+    description: "Tips, guides, and insights on natural hygiene and wellness from MMW.",
 }
 
 export const dynamic = 'force-dynamic'

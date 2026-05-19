@@ -32,9 +32,40 @@ const FREE_SHIPPING_THRESHOLD = 499
 const SHIPPING_COST = 49
 const TAX_RATE = 0.18
 
+// Save address for future use
+export async function saveCheckoutAddress(address: ShippingAddress) {
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Not authenticated', addressId: null }
+
+    const { data: addressData, error: addressError } = await supabase
+        .from('addresses')
+        .insert({
+            user_id: user.id,
+            address_type: 'shipping',
+            full_name: address.fullName,
+            address_line1: address.addressLine1,
+            address_line2: address.addressLine2 || null,
+            city: address.city,
+            state: address.state,
+            postal_code: address.postalCode,
+            country: 'IN',
+            phone: address.phone,
+            is_default: false,
+        })
+        .select('id')
+        .single()
+
+    if (addressError) return { error: addressError.message, addressId: null }
+    return { error: null, addressId: addressData.id }
+}
+
 export async function createOrder(
     shippingAddress: ShippingAddress,
-    items: CheckoutItem[]
+    items: CheckoutItem[],
+    saveNewAddress: boolean = false,
+    existingAddressId?: string
 ) {
     const supabase = await createServerClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -48,25 +79,35 @@ export async function createOrder(
     const tax = Math.round(subtotal * TAX_RATE * 100) / 100
     const total = subtotal + shipping + tax
 
-    // 1. Save the address
-    const { data: addressData, error: addressError } = await supabase
-        .from('addresses')
-        .insert({
-            user_id: user.id,
-            address_type: 'shipping',
-            full_name: shippingAddress.fullName,
-            address_line1: shippingAddress.addressLine1,
-            address_line2: shippingAddress.addressLine2 || null,
-            city: shippingAddress.city,
-            state: shippingAddress.state,
-            postal_code: shippingAddress.postalCode,
-            country: 'IN',
-            phone: shippingAddress.phone,
-        })
-        .select('id')
-        .single()
+    // 1. Handle address
+    let addressId: string
 
-    if (addressError) return { error: `Address error: ${addressError.message}`, orderId: null }
+    if (existingAddressId) {
+        // User selected an existing address - use it directly
+        addressId = existingAddressId
+    } else {
+        // User entered a new address
+        const { data: addressData, error: addressError } = await supabase
+            .from('addresses')
+            .insert({
+                user_id: user.id,
+                address_type: 'shipping',
+                full_name: shippingAddress.fullName,
+                address_line1: shippingAddress.addressLine1,
+                address_line2: shippingAddress.addressLine2 || null,
+                city: shippingAddress.city,
+                state: shippingAddress.state,
+                postal_code: shippingAddress.postalCode,
+                country: 'IN',
+                phone: shippingAddress.phone,
+                is_default: false,
+            })
+            .select('id')
+            .single()
+
+        if (addressError) return { error: `Address error: ${addressError.message}`, orderId: null }
+        addressId = addressData.id
+    }
 
     // 2. Create order
     const orderNumber = generateOrderNumber()
@@ -75,8 +116,8 @@ export async function createOrder(
         .insert({
             order_number: orderNumber,
             user_id: user.id,
-            shipping_address_id: addressData.id,
-            billing_address_id: addressData.id,
+            shipping_address_id: addressId,
+            billing_address_id: addressId,
             subtotal,
             tax,
             shipping_cost: shipping,

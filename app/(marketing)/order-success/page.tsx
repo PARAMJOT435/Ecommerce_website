@@ -6,7 +6,7 @@ import { CheckCircle, Package, ArrowRight, Home } from "lucide-react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Order Confirmed | fewofmany",
+    title: "Order Confirmed | MMW",
     description: "Your order has been placed successfully.",
 }
 

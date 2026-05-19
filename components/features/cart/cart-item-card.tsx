@@ -1,10 +1,14 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCartStore, type CartItem } from "@/stores/cart-store"
+import {
+    Sheet,
+    SheetContent,
+} from "@/components/ui/sheet"
 
 interface CartItemCardProps {
     item: CartItem
@@ -14,6 +18,16 @@ interface CartItemCardProps {
 export function CartItemCard({ item, compact = false }: CartItemCardProps) {
     const updateQuantity = useCartStore((s) => s.updateQuantity)
     const removeItem = useCartStore((s) => s.removeItem)
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+
+    const handleRemoveClick = () => {
+        setShowRemoveConfirm(true)
+    }
+
+    const handleRemoveConfirm = () => {
+        setShowRemoveConfirm(false)
+        removeItem(item.productId, item.variantId)
+    }
 
     return (
         <div className="flex gap-4 py-4">
@@ -74,7 +88,7 @@ export function CartItemCard({ item, compact = false }: CartItemCardProps) {
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-neutral-400 hover:text-red-500"
-                            onClick={() => removeItem(item.productId, item.variantId)}
+                            onClick={handleRemoveClick}
                             aria-label={`Remove ${item.name} from cart`}
                         >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -82,6 +96,26 @@ export function CartItemCard({ item, compact = false }: CartItemCardProps) {
                     </div>
                 </div>
             </div>
+
+            {showRemoveConfirm && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-lg space-y-4">
+                        <h2 className="text-lg font-semibold">Remove Item?</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Are you sure you want to remove <strong>{item.name}</strong> from your cart?
+                        </p>
+                        <div className="flex gap-2 justify-end">
+                            <Button variant="outline" onClick={() => setShowRemoveConfirm(false)}>Keep Item</Button>
+                            <Button
+                                onClick={handleRemoveConfirm}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

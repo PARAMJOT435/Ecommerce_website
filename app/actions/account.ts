@@ -11,6 +11,17 @@ export async function getProfile() {
 
     if (!user) return { profile: null, error: 'Not authenticated' }
 
+    // Check if user is admin - admins should not use customer profile
+    const { data: adminData } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+    if (adminData) {
+        return { profile: null, error: 'Admins cannot access customer account' }
+    }
+
     const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -30,15 +41,52 @@ export async function updateProfile(formData: FormData) {
     const firstName = formData.get('firstName') as string
     const lastName = formData.get('lastName') as string
     const phone = formData.get('phone') as string
+    const profilePicture = formData.get('profilePicture') as File | null
+
+    let profilePictureUrl = null
+
+    // Handle profile picture upload if provided
+    if (profilePicture && profilePicture.size > 0) {
+        try {
+            const fileExt = profilePicture.name.split('.').pop()
+            const fileName = `${user.id}-${Date.now()}.${fileExt}`
+            const filePath = `profile-pictures/${fileName}`
+
+            // Upload to Supabase storage
+            const { error: uploadError } = await supabase.storage
+                .from('users')
+                .upload(filePath, profilePicture, { upsert: true })
+
+            if (uploadError) {
+                return { error: `Failed to upload profile picture: ${uploadError.message}` }
+            }
+
+            // Get the public URL
+            const { data } = supabase.storage
+                .from('users')
+                .getPublicUrl(filePath)
+
+            profilePictureUrl = data?.publicUrl
+        } catch (err: any) {
+            return { error: `Error uploading profile picture: ${err.message}` }
+        }
+    }
+
+    const updateData: any = {
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+        updated_at: new Date().toISOString(),
+    }
+
+    // Only update profile_picture_url if a new one was provided
+    if (profilePictureUrl) {
+        updateData.profile_picture_url = profilePictureUrl
+    }
 
     const { error } = await supabase
         .from('users')
-        .update({
-            first_name: firstName,
-            last_name: lastName,
-            phone,
-            updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', user.id)
 
     if (error) return { error: error.message }
@@ -58,17 +106,42 @@ export async function changePassword(formData: FormData) {
 
     if (!user) return { error: 'Not authenticated' }
 
+    const currentPassword = formData.get('currentPassword') as string
     const newPassword = formData.get('newPassword') as string
     const confirmPassword = formData.get('confirmPassword') as string
 
+    // Validate all inputs
+    if (!currentPassword) {
+        return { error: 'Current password is required' }
+    }
+
+    if (!newPassword) {
+        return { error: 'New password is required' }
+    }
+
     if (newPassword !== confirmPassword) {
-        return { error: 'Passwords do not match' }
+        return { error: 'New passwords do not match' }
     }
 
     if (newPassword.length < 6) {
         return { error: 'Password must be at least 6 characters' }
     }
 
+    if (currentPassword === newPassword) {
+        return { error: 'New password must be different from current password' }
+    }
+
+    // Verify current password by attempting to re-authenticate
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: currentPassword,
+    })
+
+    if (signInError) {
+        return { error: 'Current password is incorrect' }
+    }
+
+    // Update to new password
     const { error } = await supabase.auth.updateUser({
         password: newPassword,
     })

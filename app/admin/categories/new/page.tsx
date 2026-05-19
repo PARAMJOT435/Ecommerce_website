@@ -6,7 +6,7 @@ export default async function NewCategoryPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className="text-2xl font-bold tracking-tight">New Category</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">New Category</h1>
             <CategoryForm
                 categories={categories.map((c: any) => ({ id: c.id, name: c.name }))}
                 action={createCategory}

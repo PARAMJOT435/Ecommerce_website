@@ -4,8 +4,8 @@ import { Truck, RotateCcw, Clock, IndianRupee, ShieldCheck, PackageOpen } from "
 import Link from "next/link"
 
 export const metadata = {
-    title: "Shipping & Returns | fewofmany",
-    description: "Learn about fewofmany shipping options, delivery times, return policy, and refund process.",
+    title: "Shipping & Returns | MMW",
+    description: "Learn about MMW shipping options, delivery times, return policy, and refund process.",
 }
 
 export default function ShippingPage() {
@@ -114,7 +114,7 @@ export default function ShippingPage() {
 
                             <h3 className="text-foreground font-medium text-sm">How to Return</h3>
                             <ol className="list-decimal list-inside space-y-1.5">
-                                <li>Email us at <a href="mailto:hello@fewofmany.com" className="text-primary-600 hover:underline">hello@fewofmany.com</a> with your order number and reason</li>
+                                <li>Email us at <a href="mailto:hello@MMW.com" className="text-primary-600 hover:underline">hello@MMW.com</a> with your order number and reason</li>
                                 <li>We'll confirm eligibility and arrange a courier pickup</li>
                                 <li>Pack the product securely in its original packaging</li>
                                 <li>Hand it to the courier when they arrive</li>

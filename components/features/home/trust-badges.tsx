@@ -1,26 +1,26 @@
-import { Truck, ShieldCheck, Leaf, Clock } from "lucide-react";
+import { Truck, ShieldCheck, Factory, Clock, Wrench } from "lucide-react";
 import { Container } from "@/components/ui/container";
 
 const features = [
     {
-        icon: Leaf,
-        title: "100% Natural",
-        description: "Sourced from nature's finest ingredients.",
+        icon: Factory,
+        title: "Industrial Grade",
+        description: "Manufactured with heavy-duty materials.",
     },
     {
         icon: ShieldCheck,
-        title: "Safe & Secure",
-        description: "Dermatologically tested and certified safe.",
+        title: "Quality Assured",
+        description: "Rigorous testing for maximum reliability.",
     },
     {
         icon: Truck,
-        title: "Free Shipping",
-        description: "On all orders above ₹999.",
+        title: "Bulk Shipping",
+        description: "Specialized transport for large orders.",
     },
     {
-        icon: Clock,
-        title: "Fast Delivery",
-        description: "Get your products within 3-5 days.",
+        icon: Wrench,
+        title: "Expert Support",
+        description: "Technical assistance when you need it.",
     },
 ];
 
