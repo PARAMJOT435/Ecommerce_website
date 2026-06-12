@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with npm ci from cache
+RUN npm install --legacy-peer-deps
 
 # Copy prisma schema
 COPY prisma ./prisma
